@@ -1,0 +1,7 @@
+{
+  "name": "smarttrashroutesmobile",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
