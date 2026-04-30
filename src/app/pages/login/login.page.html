@@ -1,0 +1,38 @@
+<ion-content class="ion-padding" style="--background: var(--bg-color);">
+  <div style="display: flex; height: 100%; align-items: center; justify-content: center;">
+    <div class="admin-card" style="width: 100%; max-width: 400px; flex: none;">
+      <div class="view-header" style="justify-content: center; margin-bottom: 30px;">
+        <h1>Login Conductor</h1>
+      </div>
+      
+      <form (ngSubmit)="handleLogin()">
+        <div class="form-group">
+          <label>Usuario</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            [(ngModel)]="username" 
+            name="username" 
+            placeholder="Ingresa tu usuario"
+            required>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 24px;">
+          <label>Contraseña</label>
+          <input 
+            type="password" 
+            class="form-control" 
+            [(ngModel)]="password" 
+            name="password" 
+            placeholder="••••••••"
+            required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;" [disabled]="loading">
+          <span *ngIf="!loading">Ingresar</span>
+          <div *ngIf="loading" class="loader-white"></div>
+        </button>
+      </form>
+    </div>
+  </div>
+</ion-content>

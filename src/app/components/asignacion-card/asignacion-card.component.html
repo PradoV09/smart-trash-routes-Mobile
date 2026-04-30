@@ -1,0 +1,41 @@
+<div class="admin-card" style="margin-bottom: 16px; padding: 20px;">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+    <div>
+      <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--primary-dark);">
+        {{ asignacion.placa }}
+      </h2>
+      <p style="margin: 4px 0 0; color: var(--text-muted); font-size: 0.9rem;">
+        {{ asignacion.modelo }}
+      </p>
+    </div>
+    <span class="badge {{ getBadgeClass(asignacion.estado) }}">
+      {{ formatEstado(asignacion.estado) }}
+    </span>
+  </div>
+  
+  <div style="margin-bottom: 20px; color: var(--text-main); font-size: 0.95rem;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+      <span style="color: var(--text-muted); font-weight: 600;">Capacidad:</span>
+      <span>{{ asignacion.capacidad }} m³</span>
+    </div>
+    <div style="display: flex; justify-content: space-between;">
+      <span style="color: var(--text-muted); font-weight: 600;">Fecha:</span>
+      <span>{{ asignacion.fecha | date }}</span>
+    </div>
+  </div>
+  
+  <div style="display: flex; gap: 10px;">
+    <button *ngIf="asignacion.estado === 'pendiente'" 
+            class="btn btn-primary" 
+            style="flex: 1; justify-content: center;"
+            (click)="onIniciar()">
+      Iniciar Recorrido
+    </button>
+    <button *ngIf="asignacion.estado === 'en_curso'" 
+            class="btn" 
+            style="flex: 1; justify-content: center; background-color: var(--status-green); color: white;"
+            (click)="onFinalizar()">
+      Finalizar Recorrido
+    </button>
+  </div>
+</div>
