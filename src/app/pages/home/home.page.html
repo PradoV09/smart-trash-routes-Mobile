@@ -1,28 +1,56 @@
-<ion-content class="ion-padding" style="--background: var(--bg-color);">
-  <div class="view-header" style="padding-top: 10px; margin-bottom: 20px;">
-    <h1 style="color: var(--primary-dark); font-weight: 700; font-size: 1.5rem; margin: 0;">Mis Asignaciones</h1>
-    <button class="btn btn-muted" (click)="logout()" style="padding: 8px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-      <ion-icon name="log-out-outline" style="font-size: 20px;"></ion-icon>
-    </button>
+<ion-content>
+  <div style="padding: 16px 16px 32px;">
+
+    <!-- Header -->
+    <div class="view-header" style="padding-top: 10px; margin-bottom: 20px;">
+      <div>
+        <h1 style="color: var(--primary-dark); font-weight: 700; font-size: 1.4rem; margin: 0;">
+          Mis Asignaciones
+        </h1>
+        <p style="margin: 4px 0 0; color: var(--text-muted); font-size: 0.85rem;">
+          {{ asignaciones.length }} asignación{{ asignaciones.length !== 1 ? 'es' : '' }}
+        </p>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <!-- Toggle tema -->
+        <button class="theme-toggle" (click)="toggleTheme()" [title]="isDark ? 'Modo claro' : 'Modo oscuro'">
+          <ion-icon [name]="isDark ? 'sunny-outline' : 'moon-outline'"></ion-icon>
+        </button>
+        <!-- Logout -->
+        <button class="theme-toggle" (click)="logout()" title="Cerrar sesión"
+                style="color: var(--status-cancelled);">
+          <ion-icon name="log-out-outline"></ion-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Vacío -->
+    <div *ngIf="asignaciones.length === 0 && !loading"
+         style="text-align: center; padding: 48px 24px; background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border-color);">
+      <ion-icon name="clipboard-outline" style="font-size: 48px; color: var(--text-muted); margin-bottom: 12px; display: block;"></ion-icon>
+      <p style="margin: 0; color: var(--text-muted); font-size: 1rem; font-weight: 600;">
+        No tienes asignaciones registradas
+      </p>
+    </div>
+
+    <!-- Lista -->
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <app-asignacion-card
+        *ngFor="let asignacion of asignaciones"
+        [asignacion]="asignacion"
+        (iniciar)="handleIniciar($event)"
+        (finalizar)="handleFinalizar($event)">
+      </app-asignacion-card>
+    </div>
+
   </div>
 
-  <div *ngIf="asignaciones.length === 0 && !loading" style="text-align: center; color: var(--text-muted); padding: 40px 20px; background: white; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
-    <p style="margin: 0; font-size: 1rem;">No tienes asignaciones registradas.</p>
-  </div>
-  
-  <div style="display: flex; flex-direction: column; gap: 16px;">
-    <app-asignacion-card 
-      *ngFor="let asignacion of asignaciones" 
-      [asignacion]="asignacion" 
-      (iniciar)="handleIniciar($event)" 
-      (finalizar)="handleFinalizar($event)">
-    </app-asignacion-card>
-  </div>
-
-  <div *ngIf="loading" class="modal-overlay" style="z-index: 9999;">
-    <div style="background: white; padding: 20px 40px; border-radius: 12px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-      <div class="loader-white" style="border-color: var(--primary-dark); border-top-color: transparent;"></div>
+  <!-- Loading overlay -->
+  <div *ngIf="loading" class="modal-overlay">
+    <div style="background: var(--bg-card); padding: 24px 40px; border-radius: 16px; display: flex; align-items: center; gap: 14px; box-shadow: 0 10px 40px var(--shadow);">
+      <div class="loader-primary"></div>
       <span style="color: var(--primary-dark); font-weight: 600;">Procesando...</span>
     </div>
   </div>
+
 </ion-content>

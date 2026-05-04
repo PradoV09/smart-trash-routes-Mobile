@@ -9,6 +9,7 @@ export class AuthService {
   constructor(private api: ApiService, private router: Router) {}
 
   async login(username: string, password: string): Promise<any> {
+    // El servidor espera "identifier" y "contraseña" (no "username"/"password")
     const body = new URLSearchParams();
     body.append('identifier', username);
     body.append('contraseña', password);
@@ -17,21 +18,22 @@ export class AuthService {
       method: 'POST',
       body: body,
     });
-    
-    if (data && data.data && data.data.access_token) {
-      localStorage.setItem('access_token', data.data.access_token);
-    } else if (data && data.access_token) {
-      // Fallback in case the wrapper changes
-      localStorage.setItem('access_token', data.access_token);
+
+    const token = data?.data?.access_token || data?.access_token;
+    if (token) {
+      localStorage.setItem('access_token', token);
+    } else {
+      throw new Error('No se recibió token de autenticación');
     }
+
     return data;
   }
-  
+
   logout(): void {
     localStorage.removeItem('access_token');
     this.router.navigate(['/login'], { replaceUrl: true });
   }
-  
+
   isAuthenticated(): boolean {
     return !!localStorage.getItem('access_token');
   }

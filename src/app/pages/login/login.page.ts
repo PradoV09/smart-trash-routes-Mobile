@@ -4,6 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
+import { addIcons } from 'ionicons';
+import {
+  personOutline,
+  lockClosedOutline,
+  eyeOutline,
+  eyeOffOutline,
+  carOutline,
+  moonOutline,
+  sunnyOutline
+} from 'ionicons/icons';
 
 @Component({
   selector: 'app-login',
@@ -15,12 +25,25 @@ export class LoginPage {
   username = '';
   password = '';
   loading = false;
+  showPassword = false;
+  isDark = false;
 
   constructor(
     private auth: AuthService,
     private router: Router,
     private toastController: ToastController
-  ) {}
+  ) {
+    addIcons({ personOutline, lockClosedOutline, eyeOutline, eyeOffOutline, carOutline, moonOutline, sunnyOutline });
+    // Restaurar tema guardado
+    this.isDark = localStorage.getItem('theme') === 'dark';
+    document.body.classList.toggle('dark-theme', this.isDark);
+  }
+
+  toggleTheme() {
+    this.isDark = !this.isDark;
+    document.body.classList.toggle('dark-theme', this.isDark);
+    localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
+  }
 
   async handleLogin() {
     if (!this.username || !this.password) {
@@ -43,7 +66,8 @@ export class LoginPage {
     const toast = await this.toastController.create({
       message,
       duration: 3000,
-      color
+      color,
+      position: 'top'
     });
     toast.present();
   }

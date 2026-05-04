@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
-import { logOutOutline } from 'ionicons/icons';
+import { logOutOutline, moonOutline, sunnyOutline, clipboardOutline } from 'ionicons/icons';
 import { AsignacionesService, Asignacion } from '../../services/asignaciones.service';
 import { AuthService } from '../../services/auth.service';
 import { AsignacionCardComponent } from '../../components/asignacion-card/asignacion-card.component';
@@ -16,7 +16,8 @@ import { AsignacionCardComponent } from '../../components/asignacion-card/asigna
 export class HomePage implements OnInit, OnDestroy {
   asignaciones: Asignacion[] = [];
   loading = false;
-  private ws!: WebSocket;
+  isDark = false;
+  private wsConnections: WebSocket[] = [];
   private serverErrorListener: any;
 
   constructor(
@@ -24,7 +25,8 @@ export class HomePage implements OnInit, OnDestroy {
     private authService: AuthService,
     private toastController: ToastController
   ) {
-    addIcons({ logOutOutline });
+    addIcons({ logOutOutline, moonOutline, sunnyOutline, clipboardOutline });
+    this.isDark = document.body.classList.contains('dark-theme');
   }
 
   ngOnInit() {
@@ -32,13 +34,17 @@ export class HomePage implements OnInit, OnDestroy {
     this.setupErrorListener();
   }
 
-  private wsConnections: WebSocket[] = [];
-
   ngOnDestroy() {
     this.wsConnections.forEach(ws => ws.close());
     if (this.serverErrorListener) {
       window.removeEventListener('api:error', this.serverErrorListener);
     }
+  }
+
+  toggleTheme() {
+    this.isDark = !this.isDark;
+    document.body.classList.toggle('dark-theme', this.isDark);
+    localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
   }
 
   setupErrorListener() {
@@ -49,7 +55,6 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   setupWebSockets(asignaciones: Asignacion[]) {
-    // Close existing
     this.wsConnections.forEach(ws => ws.close());
     this.wsConnections = [];
 
@@ -57,15 +62,19 @@ export class HomePage implements OnInit, OnDestroy {
     if (!token) return;
 
     asignaciones.forEach(a => {
-      const ws = new WebSocket(`wss://smart-trash-backend-production.up.railway.app/ws/asignacion/${a.id}?token=${token}`);
+      if (a.estado === 'completada' || a.estado === 'cancelada') return;
+
+      const ws = new WebSocket(
+        `wss://smart-trash-backend-production.up.railway.app/ws/asignacion/${a.id}?token=${token}`
+      );
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          if (data.evento === 'recorrido_iniciado' || data.evento === 'recorrido_finalizado' || data.evento === 'asignacion_cancelada') {
+          if (['recorrido_iniciado', 'recorrido_finalizado', 'asignacion_cancelada'].includes(data.evento)) {
             this.cargarAsignaciones();
           }
         } catch (err) {
-          console.error('Error parsing WS message', err);
+          console.error('WS parse error', err);
         }
       };
       this.wsConnections.push(ws);
@@ -116,7 +125,8 @@ export class HomePage implements OnInit, OnDestroy {
     const toast = await this.toastController.create({
       message,
       duration: 3000,
-      color
+      color,
+      position: 'top'
     });
     toast.present();
   }
