@@ -18,6 +18,7 @@ import { WebSocketService, WebSocketConnection } from '../../services/websocket.
 export class HomePage implements OnInit, OnDestroy {
   asignaciones: Asignacion[] = [];
   loading = false;
+  isDark = false;
   private ws!: WebSocket;
   private serverErrorListener: any;
 
@@ -112,6 +113,11 @@ export class HomePage implements OnInit, OnDestroy {
       this.presentToast(e.message, 'danger');
       this.loading = false;
     }
+  }
+
+  toggleTheme() {
+    this.isDark = !this.isDark;
+    document.body.classList.toggle('dark-theme', this.isDark);
   }
 
   logout() {
