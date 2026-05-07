@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
+import { environment } from '../../environments/environment';
 
 export interface Asignacion {
   id: string | number;
@@ -14,10 +15,10 @@ export interface Asignacion {
   providedIn: 'root'
 })
 export class AsignacionesService {
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService) { }
 
   async getAsignaciones(): Promise<Asignacion[]> {
-    const res = await this.api.fetch('/driver/asignaciones', { method: 'GET' });
+    const res = await this.api.fetch(environment.apiConfig.endpoints.driver.asignaciones, { method: 'GET' });
     const lista = res?.data || [];
     return lista.map((a: any) => ({
       id: a.id_asignacion,
@@ -30,12 +31,12 @@ export class AsignacionesService {
   }
 
   async iniciarRecorrido(id: string | number): Promise<any> {
-    const res = await this.api.fetch(`/driver/asignaciones/${id}/iniciar`, { method: 'POST' });
+    const res = await this.api.fetch(environment.apiConfig.endpoints.driver.iniciarRecorrido(id.toString()), { method: 'POST' });
     return res?.data;
   }
 
   async finalizarRecorrido(id: string | number): Promise<any> {
-    const res = await this.api.fetch(`/driver/asignaciones/${id}/finalizar`, { method: 'POST' });
+    const res = await this.api.fetch(environment.apiConfig.endpoints.driver.finalizarRecorrido(id.toString()), { method: 'POST' });
     return res?.data;
   }
 }

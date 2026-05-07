@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../environments/environment';
 
 export interface ApiResponse<T = any> {
   data?: T;
@@ -13,9 +14,9 @@ export interface ApiResponse<T = any> {
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'https://smart-trash-backend-production.up.railway.app';
+  private baseUrl = environment.apiConfig.baseUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private handleError(error: HttpErrorResponse) {
     if (error.status === 401) {
@@ -23,11 +24,11 @@ export class ApiService {
       window.location.href = '/login';
       return throwError(() => 'Sesión expirada');
     }
-    
+
     if (error.status >= 500) {
       return throwError(() => 'Error del servidor');
     }
-    
+
     return throwError(() => error.error?.message || 'Error desconocido');
   }
 
