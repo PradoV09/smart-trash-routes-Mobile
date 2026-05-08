@@ -15,5 +15,10 @@ export const routes: Routes = [
     path: 'home',
     loadComponent: () => import('./pages/home/home.page').then(m => m.HomePage),
     canActivate: [AuthGuard]
+  },
+  {
+    path: 'map',
+    loadComponent: () => import('./pages/map/map.page').then(m => m.MapPage),
+    canActivate: [AuthGuard]
   }
 ];

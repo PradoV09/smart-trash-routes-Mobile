@@ -35,7 +35,7 @@
                 "output": "assets"
               }
             ],
-            "styles": ["src/global.scss", "src/theme/variables.scss"],
+            "styles": ["src/global.scss", "src/theme/variables.scss", "node_modules/leaflet/dist/leaflet.css"],
             "scripts": [],
             "browser": "src/main.ts"
           },
@@ -68,7 +68,6 @@
               "namedChunks": true
             },
             "ci": {
-              "progress": false
             }
           },
           "defaultConfiguration": "development"
@@ -83,7 +82,6 @@
               "buildTarget": "app:build:development"
             },
             "ci": {
-              "progress": false
             }
           },
           "defaultConfiguration": "development"
@@ -109,12 +107,11 @@
                 "output": "assets"
               }
             ],
-            "styles": ["src/global.scss", "src/theme/variables.scss"],
+            "styles": ["src/global.scss", "src/theme/variables.scss", "node_modules/leaflet/dist/leaflet.css"],
             "scripts": []
           },
           "configurations": {
             "ci": {
-              "progress": false,
               "watch": false
             }
           }

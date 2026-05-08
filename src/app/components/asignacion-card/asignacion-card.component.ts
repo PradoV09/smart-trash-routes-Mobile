@@ -1,11 +1,12 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule, DecimalPipe, DatePipe, SlicePipe } from '@angular/common';
+import { Router } from '@angular/router';
 import { Asignacion } from '../../services/asignaciones.service';
 import { addIcons } from 'ionicons';
 import {
   busOutline, peopleOutline, timeOutline,
-  playOutline, checkmarkCircleOutline
+  playOutline, checkmarkCircleOutline, mapOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -19,8 +20,10 @@ export class AsignacionCardComponent {
   @Output() iniciar = new EventEmitter<string | number>();
   @Output() finalizar = new EventEmitter<string | number>();
 
+  private router = inject(Router);
+
   constructor() {
-    addIcons({ busOutline, peopleOutline, timeOutline, playOutline, checkmarkCircleOutline });
+    addIcons({ busOutline, peopleOutline, timeOutline, playOutline, checkmarkCircleOutline, mapOutline });
   }
 
   getBadgeClass(estado: string): string {
@@ -39,4 +42,5 @@ export class AsignacionCardComponent {
 
   onIniciar()   { this.iniciar.emit(this.asignacion.id); }
   onFinalizar() { this.finalizar.emit(this.asignacion.id); }
+  onVerMapa()   { this.router.navigate(['/map']); }
 }

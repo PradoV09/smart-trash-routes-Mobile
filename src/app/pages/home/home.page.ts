@@ -6,21 +6,22 @@ import { logOutOutline, moonOutline, sunnyOutline, clipboardOutline } from 'ioni
 import { AsignacionesService, Asignacion } from '../../services/asignaciones.service';
 import { AuthService } from '../../services/auth.service';
 import { AsignacionCardComponent } from '../../components/asignacion-card/asignacion-card.component';
-import { environment } from '../../../environments/environment';
-import { WebSocketService, WebSocketConnection } from '../../services/websocket.service';
+import { SkeletonCardComponent } from '../../components/skeleton-card/skeleton-card.component';
+import { WebSocketService } from '../../services/websocket.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
   standalone: true,
-  imports: [IonicModule, CommonModule, AsignacionCardComponent]
+  imports: [IonicModule, CommonModule, AsignacionCardComponent, SkeletonCardComponent]
 })
 export class HomePage implements OnInit, OnDestroy {
   asignaciones: Asignacion[] = [];
   loading = false;
+  isInitialLoading = true;
   isDark = false;
-  private ws!: WebSocket;
   private serverErrorListener: any;
+  private wsConnections: WebSocket[] = [];
 
   constructor(
     private asignacionesService: AsignacionesService,
@@ -37,8 +38,6 @@ export class HomePage implements OnInit, OnDestroy {
     this.setupErrorListener();
   }
 
-  private wsConnections: WebSocket[] = [];
-
   ngOnDestroy() {
     this.wsConnections.forEach(ws => ws.close());
     if (this.serverErrorListener) {
@@ -54,7 +53,6 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   setupWebSockets(asignaciones: Asignacion[]) {
-    // Close existing
     this.wsConnections.forEach(ws => ws.close());
     this.wsConnections = [];
 
@@ -62,15 +60,18 @@ export class HomePage implements OnInit, OnDestroy {
     if (!token) return;
 
     asignaciones.forEach(a => {
-      const ws = new WebSocket(`wss://smart-trash-backend-production.up.railway.app/ws/asignacion/${a.id}?token=${token}`);
+      if (a.estado === 'completada' || a.estado === 'cancelada') return;
+      const ws = new WebSocket(
+        `wss://smart-trash-backend-production.up.railway.app/ws/asignacion/${a.id}?token=${token}`
+      );
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          if (data.evento === 'recorrido_iniciado' || data.evento === 'recorrido_finalizado' || data.evento === 'asignacion_cancelada') {
+          if (['recorrido_iniciado', 'recorrido_finalizado', 'asignacion_cancelada'].includes(data.evento)) {
             this.cargarAsignaciones();
           }
         } catch (err) {
-          console.error('Error parsing WS message', err);
+          console.error('WS parse error', err);
         }
       };
       this.wsConnections.push(ws);
@@ -78,13 +79,14 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   async cargarAsignaciones() {
-    this.loading = true;
+    this.isInitialLoading = this.asignaciones.length === 0;
     try {
       this.asignaciones = await this.asignacionesService.getAsignaciones();
-      await this.setupWebSockets(this.asignaciones);
+      this.setupWebSockets(this.asignaciones);
     } catch (err: any) {
       this.presentToast(err.message, 'danger');
     } finally {
+      this.isInitialLoading = false;
       this.loading = false;
     }
   }
@@ -94,7 +96,6 @@ export class HomePage implements OnInit, OnDestroy {
     try {
       await this.asignacionesService.iniciarRecorrido(id);
       this.presentToast('Recorrido iniciado', 'success');
-      // Reload assignments to get updated status
       await this.cargarAsignaciones();
     } catch (e: any) {
       this.presentToast(e.message, 'danger');
@@ -107,7 +108,6 @@ export class HomePage implements OnInit, OnDestroy {
     try {
       await this.asignacionesService.finalizarRecorrido(id);
       this.presentToast('Recorrido finalizado', 'success');
-      // Reload assignments to get updated status
       await this.cargarAsignaciones();
     } catch (e: any) {
       this.presentToast(e.message, 'danger');
@@ -118,24 +118,19 @@ export class HomePage implements OnInit, OnDestroy {
   toggleTheme() {
     this.isDark = !this.isDark;
     document.body.classList.toggle('dark-theme', this.isDark);
+    localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
   }
 
+  // Logout simplificado — cierra WS locales y navega directo
   logout() {
-    console.log('Iniciando logout...');
-
-    // Disconnect WebSockets first (async but don't wait to block)
-    this.webSocketService.disconnectAll()
-      .then(() => {
-        console.log('Logout: WebSockets desconectados exitosamente');
-      })
-      .catch((error) => {
-        console.error('Logout: Error desconectando WebSockets:', error);
-      })
-      .finally(() => {
-        // Always navigate to login, regardless of disconnection outcome
-        this.authService.logout();
-        console.log('Logout completado - navegando a login');
-      });
+    this.wsConnections.forEach(ws => {
+      try { ws.close(); } catch (e) {}
+    });
+    this.wsConnections = [];
+    try {
+      this.webSocketService.disconnectAll();
+    } catch (e) {}
+    this.authService.logout();
   }
 
   async presentToast(message: string, color: string) {
