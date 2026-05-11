@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
-import { environment } from '../../environments/environment';
 
 export interface Tripulante {
   id: number;
@@ -17,47 +16,105 @@ export interface Asignacion {
   estado: 'pendiente' | 'en_curso' | 'completada' | 'cancelada';
   fecha: string;
   hora_salida?: string;
-  // Campos de tripulación (de la spec)
+  id_ruta?: string;
+  id_recorrido?: string; // UUID del servicio externo
   tripulacion_nombre?: string;
   tripulantes?: Tripulante[];
+}
+
+export interface PosicionGPS {
+  latitud: number;
+  longitud: number;
+  accuracy?: number;
+  speed?: number;
+  bearing?: number;
+  timestamp: string;
+}
+
+export interface FotoAsignacion {
+  nombre: string;
+  data: string;
+  tipo: 'recoleccion' | 'incidencia' | 'cumplimiento';
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AsignacionesService {
-  constructor(private api: ApiService) { }
+  constructor(private api: ApiService) {}
 
   async getAsignaciones(): Promise<Asignacion[]> {
-    const res = await this.api.fetch(environment.apiConfig.endpoints.driver.asignaciones, { method: 'GET' });
-    const lista = res?.data || [];
-
-    return lista.map((a: any) => ({
-      id: a.id_asignacion,
+    const res = await this.api.fetch('/api/driver/asignaciones', { method: 'GET' });
+    console.log('API Response:', res);
+    const lista = Array.isArray(res) ? res : (res?.data || []);
+    const mapped = lista.map((a: any) => ({
+      id: a.id_asignacion || a.id,
+      id_ruta: a.id_ruta,
+      id_recorrido: a.id_recorrido || a.recorrido_externo_id || null,
       placa: a.vehiculo?.placa || 'N/A',
       modelo: a.vehiculo?.modelo || 'N/A',
       capacidad: a.vehiculo?.capacidad_m3 || 0,
-      estado: a.estado,
+      estado: (a.estado || 'pendiente').toLowerCase(),
       fecha: a.fecha,
       hora_salida: a.hora_salida,
-      // Tripulación desde la spec: a.tripulacion.nombre y a.tripulacion.miembros
       tripulacion_nombre: a.tripulacion?.nombre || null,
       tripulantes: (a.tripulacion?.miembros || []).map((m: any) => ({
         id: m.id,
-        rol_tripulacion: m.rol_tripulacion,
-        username: m.usuario?.username || '',
-        correo: m.usuario?.correo || '',
+        rol_tripulacion: m.rol_tripulacion || m.rol,
+        username: m.usuario?.username || m.username || 'Usuario',
+        correo: m.usuario?.correo || m.correo || '',
       }))
     }));
+    console.log('Mapped Asignaciones:', mapped);
+    return mapped;
   }
 
   async iniciarRecorrido(id: string | number): Promise<any> {
-    const res = await this.api.fetch(environment.apiConfig.endpoints.driver.iniciarRecorrido(id.toString()), { method: 'POST' });
+    const res = await this.api.fetch(`/api/driver/asignaciones/${id}/iniciar`, { method: 'POST' });
     return res?.data;
   }
 
   async finalizarRecorrido(id: string | number): Promise<any> {
-    const res = await this.api.fetch(environment.apiConfig.endpoints.driver.finalizarRecorrido(id.toString()), { method: 'POST' });
+    const res = await this.api.fetch(`/api/driver/asignaciones/${id}/finalizar`, { method: 'POST' });
     return res?.data;
+  }
+
+  async enviarPosicion(id: string | number, posicion: PosicionGPS): Promise<any> {
+    return this.api.fetch(`/api/driver/asignaciones/${id}/posiciones`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(posicion)
+    });
+  }
+
+  async enviarPosicionExterna(idRecorrido: string, lat: number, lon: number): Promise<any> {
+    const token = localStorage.getItem('access_token');
+    return fetch(`https://smart-trash-backend-production.up.railway.app/api/recorridos/${idRecorrido}/posiciones`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ lat, lon })
+    });
+  }
+
+  async getPosicionesRecorrido(idRecorrido: string): Promise<{ lat: number; lon: number; timestamp: string }[]> {
+    const res = await fetch(`https://smart-trash-backend-production.up.railway.app/api/recorridos/${idRecorrido}/posiciones`);
+    const data = await res.json();
+    return data?.data || [];
+  }
+
+  async enviarFoto(id: string | number, foto: FotoAsignacion): Promise<any> {
+    return this.api.fetch(`/api/driver/asignaciones/${id}/fotos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(foto)
+    });
+  }
+
+  async getTripulacion(id: string | number): Promise<any> {
+    const res = await this.api.fetch(`/api/driver/asignaciones/${id}/tripulacion`, { method: 'GET' });
+    return res?.data || res;
   }
 }

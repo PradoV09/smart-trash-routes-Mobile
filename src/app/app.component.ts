@@ -7,5 +7,12 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
   imports: [IonApp, IonRouterOutlet],
 })
 export class AppComponent {
-  constructor() {}
+  constructor() {
+    this.initializeApp();
+  }
+
+  initializeApp() {
+    const isDark = localStorage.getItem('theme') === 'dark';
+    document.body.classList.toggle('dark-theme', isDark);
+  }
 }

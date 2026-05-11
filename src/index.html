@@ -20,6 +20,14 @@
 </head>
 
 <body>
+  <script>
+    (function() {
+      const theme = localStorage.getItem('theme');
+      if (theme === 'dark') {
+        document.body.classList.add('dark-theme');
+      }
+    })();
+  </script>
   <app-root></app-root>
 </body>
 

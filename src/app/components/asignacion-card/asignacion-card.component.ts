@@ -1,29 +1,29 @@
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule, DecimalPipe, DatePipe, SlicePipe } from '@angular/common';
-import { Router } from '@angular/router';
 import { Asignacion } from '../../services/asignaciones.service';
+import { ReporteModalComponent } from '../reporte-modal/reporte-modal.component';
 import { addIcons } from 'ionicons';
 import {
   busOutline, peopleOutline, timeOutline,
-  playOutline, checkmarkCircleOutline, mapOutline
+  playOutline, checkmarkCircleOutline, mapOutline, cameraOutline
 } from 'ionicons/icons';
 
 @Component({
   selector: 'app-asignacion-card',
   templateUrl: './asignacion-card.component.html',
   standalone: true,
-  imports: [IonicModule, CommonModule, DecimalPipe, DatePipe, SlicePipe]
+  imports: [IonicModule, CommonModule, DecimalPipe, DatePipe, SlicePipe, ReporteModalComponent]
 })
 export class AsignacionCardComponent {
   @Input() asignacion!: Asignacion;
   @Output() iniciar = new EventEmitter<string | number>();
   @Output() finalizar = new EventEmitter<string | number>();
 
-  private router = inject(Router);
+  mostrarReporte = false;
 
   constructor() {
-    addIcons({ busOutline, peopleOutline, timeOutline, playOutline, checkmarkCircleOutline, mapOutline });
+    addIcons({ busOutline, peopleOutline, timeOutline, playOutline, checkmarkCircleOutline, mapOutline, cameraOutline });
   }
 
   getBadgeClass(estado: string): string {
@@ -42,5 +42,5 @@ export class AsignacionCardComponent {
 
   onIniciar()   { this.iniciar.emit(this.asignacion.id); }
   onFinalizar() { this.finalizar.emit(this.asignacion.id); }
-  onVerMapa()   { this.router.navigate(['/map']); }
+  onVerMapa()   { window.location.href = '/map'; }
 }
