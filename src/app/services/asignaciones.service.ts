@@ -8,6 +8,11 @@ export interface Tripulante {
   correo: string;
 }
 
+export interface PuntoRuta {
+  lat: number;
+  lon: number;
+}
+
 export interface Asignacion {
   id: string | number;
   placa: string;
@@ -17,7 +22,10 @@ export interface Asignacion {
   fecha: string;
   hora_salida?: string;
   id_ruta?: string;
-  id_recorrido?: string; // UUID del servicio externo
+  id_recorrido?: string;
+  ruta_nombre?: string;
+  ruta_color?: string;
+  ruta_shape?: PuntoRuta[];
   tripulacion_nombre?: string;
   tripulantes?: Tripulante[];
 }
@@ -43,6 +51,31 @@ export interface FotoAsignacion {
 export class AsignacionesService {
   constructor(private api: ApiService) {}
 
+  // Parsea el shape MultiLineString (string JSON) a array de {lat, lon}
+  private parseShape(shape: any): PuntoRuta[] {
+    if (!shape) return [];
+    try {
+      const geojson = typeof shape === 'string' ? JSON.parse(shape) : shape;
+      if (geojson.type === 'MultiLineString') {
+        // coordinates: [[[lon, lat], [lon, lat]], [[lon, lat]...]]
+        const puntos: PuntoRuta[] = [];
+        for (const linea of geojson.coordinates) {
+          for (const coord of linea) {
+            puntos.push({ lat: coord[1], lon: coord[0] });
+          }
+        }
+        return puntos;
+      }
+      if (geojson.type === 'LineString') {
+        return geojson.coordinates.map((c: number[]) => ({ lat: c[1], lon: c[0] }));
+      }
+      return [];
+    } catch (e) {
+      console.error('Error parseando shape', e);
+      return [];
+    }
+  }
+
   async getAsignaciones(): Promise<Asignacion[]> {
     const res = await this.api.fetch('/api/driver/asignaciones', { method: 'GET' });
     console.log('API Response:', res);
@@ -57,6 +90,9 @@ export class AsignacionesService {
       estado: (a.estado || 'pendiente').toLowerCase(),
       fecha: a.fecha,
       hora_salida: a.hora_salida,
+      ruta_nombre: a.ruta?.nombre_ruta || null,
+      ruta_color: a.ruta?.color_hex || '#0A4174',
+      ruta_shape: this.parseShape(a.ruta?.shape),
       tripulacion_nombre: a.tripulacion?.nombre || null,
       tripulantes: (a.tripulacion?.miembros || []).map((m: any) => ({
         id: m.id,
