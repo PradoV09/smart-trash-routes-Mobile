@@ -78,7 +78,7 @@ export class AsignacionesService {
 
   async getAsignaciones(): Promise<Asignacion[]> {
     const res = await this.api.fetch('/api/driver/asignaciones', { method: 'GET' });
-    console.log('API Response:', res);
+    console.log('API Response:', JSON.stringify(res));
     const lista = Array.isArray(res) ? res : (res?.data || []);
     const mapped = lista.map((a: any) => ({
       id: a.id_asignacion || a.id,
@@ -101,7 +101,7 @@ export class AsignacionesService {
         correo: m.usuario?.correo || m.correo || '',
       }))
     }));
-    console.log('Mapped Asignaciones:', mapped);
+    console.log('Mapped Asignaciones:', JSON.stringify(mapped));
     return mapped;
   }
 

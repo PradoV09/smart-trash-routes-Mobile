@@ -2,6 +2,8 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+
 import { ReporteService } from '../../services/reporte.service';
 import { addIcons } from 'ionicons';
 import {
@@ -43,49 +45,50 @@ export class ReporteModalComponent {
     }
   }
 
-  abrirCamara() {
+  async abrirCamara() {
     if (this.fotos.length >= 5) {
       this.presentToast('Máximo 5 fotos por reporte', 'warning');
       return;
     }
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/jpeg,image/png,image/jpg';
-    input.capture = 'environment';
-    input.onchange = async (e: any) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 5 * 1024 * 1024) {
-        this.presentToast('La foto no puede superar 5MB', 'warning');
-        return;
+    try {
+      const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Camera
+      });
+
+      if (image.base64String) {
+        const base64 = `data:image/jpeg;base64,${image.base64String}`;
+        const nombre = `foto_${Date.now()}.jpg`;
+        this.fotos.push({ nombre, data: base64, preview: base64 });
       }
-      const base64 = await this.fileToBase64(file);
-      const nombre = `foto_${Date.now()}.jpg`;
-      this.fotos.push({ nombre, data: base64, preview: base64 });
-    };
-    input.click();
+    } catch (e) {
+      console.log('Error al capturar foto', e);
+    }
   }
 
-  abrirSelector() {
+  async abrirSelector() {
     if (this.fotos.length >= 5) {
       this.presentToast('Máximo 5 fotos por reporte', 'warning');
       return;
     }
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/jpeg,image/png,image/jpg';
-    input.onchange = async (e: any) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 5 * 1024 * 1024) {
-        this.presentToast('La foto no puede superar 5MB', 'warning');
-        return;
+    try {
+      const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Photos
+      });
+
+      if (image.base64String) {
+        const base64 = `data:image/jpeg;base64,${image.base64String}`;
+        const nombre = `foto_${Date.now()}.jpg`;
+        this.fotos.push({ nombre, data: base64, preview: base64 });
       }
-      const base64 = await this.fileToBase64(file);
-      const nombre = `foto_${Date.now()}.jpg`;
-      this.fotos.push({ nombre, data: base64, preview: base64 });
-    };
-    input.click();
+    } catch (e) {
+      console.log('Error al seleccionar foto', e);
+    }
   }
 
   private fileToBase64(file: File): Promise<string> {
