@@ -1,0 +1,367 @@
+/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --primary-dark: #001d39;
+  --secondary-teal: #4e8ea2;
+  --bg-color: #f8f9fa;
+  --card-bg: #ffffff;
+  --text-main: #333333;
+  --text-muted: #666666;
+  --gray-light: #f0f2f5;
+  --border-color: #e2e8f0;
+
+  --status-green: #10b981;
+  --status-green-bg: #d1fae5;
+  --status-blue: #3b82f6;
+  --status-blue-bg: #dbeafe;
+  --status-orange: #f59e0b;
+  --status-orange-bg: #fef3c7;
+  --status-red: #ef4444;
+  --status-red-bg: #fee2e2;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+}
+
+app-root {
+  display: block;
+  height: 100%;
+}
+
+/* Auth pages wrapper */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  overflow-y: auto;
+}
+
+/* Base Card Style */
+.admin-card {
+  background-color: var(--card-bg);
+  border-radius: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Prohibido el scroll horizontal */
+  position: relative;
+}
+
+/* View Header */
+.view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+
+.view-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin: 0;
+}
+
+/* Buttons */
+.btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background-color: var(--primary-dark);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #002b54;
+}
+
+.btn-secondary {
+  background-color: var(--secondary-teal);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #3b7488;
+}
+
+/* Data Tables using Flexbox/Grid */
+.data-table {
+  width: 100%;
+  padding-right: 4px;
+  display: block;
+}
+
+/* Scrollbar global y moderno */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* Forzar el scrollbar en elementos específicos si es necesario */
+.admin-card, 
+.data-table,
+.modal-body,
+.sidebar,
+.content-area {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.data-table-header {
+  display: grid;
+  background-color: var(--gray-light);
+  border-radius: 10px 10px 0 0;
+  padding: 16px;
+  font-weight: 600;
+  color: var(--primary-dark);
+  border-bottom: 2px solid var(--border-color);
+  position: sticky;
+  top: -24px;
+  /* Compensamos el padding de la tarjeta */
+  z-index: 10;
+}
+
+.data-table-row {
+  display: grid;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+  align-items: center;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.data-table-row:hover {
+  background-color: #fafafa;
+}
+
+.data-table-row:last-child {
+  border-bottom: none;
+}
+
+/* Action Buttons in tables */
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.btn-icon.edit-btn {
+  color: var(--status-blue);
+}
+
+.btn-icon.edit-btn:hover {
+  background-color: var(--status-blue-bg);
+}
+
+.btn-icon.delete-btn {
+  color: var(--status-red);
+}
+
+.btn-icon.delete-btn:hover {
+  background-color: var(--status-red-bg);
+}
+
+/* Badges */
+.badge {
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  text-align: center;
+}
+
+.badge-disponible,
+.badge-success,
+.badge-baja {
+  background-color: var(--status-green-bg);
+  color: var(--status-green);
+}
+
+.badge-en_ruta,
+.badge-info {
+  background-color: var(--status-blue-bg);
+  color: var(--status-blue);
+}
+
+.badge-mantenimiento,
+.badge-warning,
+.badge-media {
+  background-color: var(--status-orange-bg);
+  color: var(--status-orange);
+}
+
+.badge-alta,
+.badge-error {
+  background-color: var(--status-red-bg);
+  color: var(--status-red);
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 24px;
+  width: 90%;
+  max-width: 500px;
+  padding: 2rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.wide-modal {
+  max-width: 650px !important;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1e293b;
+}
+
+.modal-body {
+  margin-bottom: 1.5rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  color: #334155;
+  box-sizing: border-box;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.loader-white {
+  width: 20px;
+  height: 20px;
+  border: 2px solid white;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.btn-muted {
+  background-color: transparent;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-muted:hover {
+  background-color: #f1f5f9;
+  color: #334155;
+}

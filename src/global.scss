@@ -1,37 +1,291 @@
-/*
- * App Global CSS
- * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
- */
+/* =============================================
+   PALETA: 001D39 | 0A4174 | 49769F | 4E8EA2 | 6EA2B3 | 7BBDE8 | BDD8E9
+   ============================================= */
 
-/* Core CSS required for Ionic components to work properly */
-@import "@ionic/angular/css/core.css";
+:root {
+  --c1: #001D39;   /* navy oscuro */
+  --c2: #0A4174;   /* azul fuerte */
+  --c3: #49769F;   /* azul medio */
+  --c4: #4E8EA2;   /* teal */
+  --c5: #6EA2B3;   /* azul claro */
+  --c6: #7BBDE8;   /* cielo */
+  --c7: #BDD8E9;   /* celeste pálido */
 
-/* Basic CSS for apps built with Ionic */
-@import "@ionic/angular/css/normalize.css";
-@import "@ionic/angular/css/structure.css";
-@import "@ionic/angular/css/typography.css";
-@import "@ionic/angular/css/display.css";
+  /* LIGHT THEME (default) */
+  --bg-color:      #F0F7FC;
+  --bg-card:       #FFFFFF;
+  --bg-input:      #E8F2FA;
+  --primary:       #0A4174;
+  --primary-dark:  #001D39;
+  --primary-light: #7BBDE8;
+  --accent:        #4E8EA2;
+  --text-main:     #001D39;
+  --text-muted:    #49769F;
+  --text-on-primary: #FFFFFF;
+  --border-color:  #BDD8E9;
+  --shadow:        rgba(10, 65, 116, 0.12);
 
-/* Optional CSS utils that can be commented out */
-@import "@ionic/angular/css/padding.css";
-@import "@ionic/angular/css/float-elements.css";
-@import "@ionic/angular/css/text-alignment.css";
-@import "@ionic/angular/css/text-transformation.css";
-@import "@ionic/angular/css/flex-utils.css";
+  --status-pending:   #F59E0B;
+  --status-active:    #4E8EA2;
+  --status-done:      #10B981;
+  --status-cancelled: #EF4444;
+}
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
+@media (prefers-color-scheme: dark) {
+  :root { --dark-mode: 1; }
+}
 
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+body.dark-theme {
+  --bg-color:      #001D39;
+  --bg-card:       #0A2D50;
+  --bg-input:      #0D3660;
+  --primary:       #7BBDE8;
+  --primary-dark:  #BDD8E9;
+  --primary-light: #4E8EA2;
+  --accent:        #6EA2B3;
+  --text-main:     #E8F4FF;
+  --text-muted:    #7BBDE8;
+  --text-on-primary: #001D39;
+  --border-color:  #0A4174;
+  --shadow:        rgba(0, 0, 0, 0.4);
+}
+
+/* =============================================
+   BASE
+   ============================================= */
+* { box-sizing: border-box; }
+
+body {
+  background: var(--bg-color);
+  color: var(--text-main);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: background 0.3s, color 0.3s;
+}
+
+ion-content {
+  --background: var(--bg-color);
+}
+
+/* =============================================
+   CARDS
+   ============================================= */
+.admin-card {
+  background: var(--bg-card);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 20px var(--shadow);
+  border: 1px solid var(--border-color);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.admin-card:hover {
+  box-shadow: 0 8px 30px var(--shadow);
+}
+
+/* =============================================
+   VIEW HEADER
+   ============================================= */
+.view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h1 {
+    color: var(--primary-dark);
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin: 0;
+  }
+}
+
+/* =============================================
+   FORMS
+   ============================================= */
+.form-group {
+  margin-bottom: 18px;
+
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+}
+
+.form-control {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-main);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &::placeholder { color: var(--text-muted); opacity: 0.7; }
+
+  &:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(10, 65, 116, 0.15);
+  }
+}
+
+/* =============================================
+   BUTTONS
+   ============================================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 24px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.2s;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--c2), var(--c1));
+  color: white;
+  box-shadow: 0 4px 15px rgba(10, 65, 116, 0.35);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(10, 65, 116, 0.45);
+  }
+
+  &:active:not(:disabled) { transform: translateY(0); }
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: white;
+  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+  }
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, var(--c4), var(--c3));
+  color: white;
+  box-shadow: 0 4px 15px rgba(78, 142, 162, 0.3);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+}
+
+.btn-muted {
+  background: var(--bg-input);
+  color: var(--text-muted);
+  border: 1.5px solid var(--border-color);
+
+  &:hover { background: var(--border-color); }
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #DC2626, #B91C1C);
+  color: white;
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+}
+
+/* =============================================
+   BADGES
+   ============================================= */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.badge-warning  { background: #FEF3C7; color: #92400E; }
+.badge-info     { background: #DBEAFE; color: #1E40AF; }
+.badge-success  { background: #D1FAE5; color: #065F46; }
+.badge-error    { background: #FEE2E2; color: #991B1B; }
+
+/* dark theme badge adjustments */
+body.dark-theme {
+  .badge-warning  { background: #78350F; color: #FDE68A; }
+  .badge-info     { background: #1E3A8A; color: #93C5FD; }
+  .badge-success  { background: #064E3B; color: #6EE7B7; }
+  .badge-error    { background: #7F1D1D; color: #FCA5A5; }
+}
+
+/* =============================================
+   LOADER
+   ============================================= */
+.loader-white {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.loader-primary {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid var(--border-color);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* =============================================
+   MODAL OVERLAY
+   ============================================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 29, 57, 0.5);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* =============================================
+   THEME TOGGLE BUTTON
+   ============================================= */
+.theme-toggle {
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s;
+
+  &:hover { background: var(--border-color); }
+
+  ion-icon { font-size: 18px; }
+}

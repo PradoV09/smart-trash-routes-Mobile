@@ -1,0 +1,83 @@
+<ion-content>
+  <!-- Theme toggle -->
+  <div style="position: absolute; top: 16px; right: 16px; z-index: 10;">
+    <button class="theme-toggle" (click)="toggleTheme()" [title]="isDark ? 'Modo claro' : 'Modo oscuro'">
+      <ion-icon [name]="isDark ? 'sunny-outline' : 'moon-outline'"></ion-icon>
+    </button>
+  </div>
+
+  <div style="display: flex; height: 100%; align-items: center; justify-content: center; padding: 24px;">
+    <div class="admin-card" style="width: 100%; max-width: 400px;">
+
+      <!-- Logo -->
+      <div style="text-align: center; margin-bottom: 28px;">
+        <img src="assets/icon/logo.png" alt="Smart Trash Routes" style="
+          width: 200px; height: 200px;
+          object-fit: contain;
+          margin-bottom: 16px;
+          filter: drop-shadow(0 8px 24px rgba(10,65,116,0.35));
+        ">
+        <h1 style="margin: 0; font-size: 1.6rem; font-weight: 700; color: var(--primary-dark);">
+          Login Conductor
+        </h1>
+        <p style="margin: 6px 0 0; color: var(--text-muted); font-size: 0.9rem;">
+          Ingresa tus credenciales para continuar
+        </p>
+      </div>
+
+      <!-- Form -->
+      <form (ngSubmit)="handleLogin()">
+        <div class="form-group">
+          <label>Usuario</label>
+          <div style="position: relative;">
+            <ion-icon name="person-outline" style="
+              position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+              color: var(--text-muted); font-size: 18px; pointer-events: none;
+            "></ion-icon>
+            <input
+              type="text"
+              class="form-control"
+              style="padding-left: 44px;"
+              [(ngModel)]="username"
+              name="username"
+              placeholder="Ingresa tu usuario"
+              autocomplete="username"
+              required>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 28px;">
+          <label>Contraseña</label>
+          <div style="position: relative;">
+            <ion-icon name="lock-closed-outline" style="
+              position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+              color: var(--text-muted); font-size: 18px; pointer-events: none;
+            "></ion-icon>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              class="form-control"
+              style="padding-left: 44px; padding-right: 44px;"
+              [(ngModel)]="password"
+              name="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required>
+            <button type="button" (click)="showPassword = !showPassword" style="
+              position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+              background: none; border: none; cursor: pointer; color: var(--text-muted);
+              padding: 0; display: flex;
+            ">
+              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" style="font-size: 18px;"></ion-icon>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 15px;" [disabled]="loading">
+          <span *ngIf="!loading">Ingresar</span>
+          <div *ngIf="loading" class="loader-white"></div>
+        </button>
+      </form>
+
+    </div>
+  </div>
+</ion-content>
