@@ -5,6 +5,7 @@ import { addIcons } from 'ionicons';
 import { logOutOutline, moonOutline, sunnyOutline, clipboardOutline } from 'ionicons/icons';
 import { AsignacionesService, Asignacion } from '../../services/asignaciones.service';
 import { AuthService } from '../../services/auth.service';
+import { GpsService } from '../../services/gps.service';
 import { AsignacionCardComponent } from '../../components/asignacion-card/asignacion-card.component';
 import { SkeletonCardComponent } from '../../components/skeleton-card/skeleton-card.component';
 import { WebSocketService } from '../../services/websocket.service';
@@ -27,7 +28,8 @@ export class HomePage implements OnInit, OnDestroy {
     private asignacionesService: AsignacionesService,
     private authService: AuthService,
     private toastController: ToastController,
-    private webSocketService: WebSocketService
+    private webSocketService: WebSocketService,
+    private gpsService: GpsService
   ) {
     addIcons({ logOutOutline, moonOutline, sunnyOutline, clipboardOutline });
     this.isDark = document.body.classList.contains('dark-theme');
@@ -40,6 +42,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.wsConnections.forEach(ws => ws.close());
+    this.gpsService.detenerTracking();
     if (this.serverErrorListener) {
       window.removeEventListener('api:error', this.serverErrorListener);
     }
@@ -83,6 +86,14 @@ export class HomePage implements OnInit, OnDestroy {
     try {
       this.asignaciones = await this.asignacionesService.getAsignaciones();
       this.setupWebSockets(this.asignaciones);
+
+      // Iniciar GPS si hay una asignación en curso
+      const enCurso = this.asignaciones.find(a => a.estado === 'en_curso');
+      if (enCurso) {
+        this.gpsService.iniciarTracking(enCurso.id, enCurso.id_recorrido);
+      } else {
+        this.gpsService.detenerTracking();
+      }
     } catch (err: any) {
       this.presentToast(err.message, 'danger');
     } finally {
@@ -94,8 +105,11 @@ export class HomePage implements OnInit, OnDestroy {
   async handleIniciar(id: string | number) {
     this.loading = true;
     try {
-      await this.asignacionesService.iniciarRecorrido(id);
+      const data = await this.asignacionesService.iniciarRecorrido(id);
       this.presentToast('Recorrido iniciado', 'success');
+      // Obtener id_recorrido de la respuesta
+      const idRecorrido = data?.recorrido_externo_id || data?.id_recorrido || null;
+      this.gpsService.iniciarTracking(id, idRecorrido);
       await this.cargarAsignaciones();
     } catch (e: any) {
       this.presentToast(e.message, 'danger');
@@ -108,6 +122,7 @@ export class HomePage implements OnInit, OnDestroy {
     try {
       await this.asignacionesService.finalizarRecorrido(id);
       this.presentToast('Recorrido finalizado', 'success');
+      this.gpsService.detenerTracking();
       await this.cargarAsignaciones();
     } catch (e: any) {
       this.presentToast(e.message, 'danger');
@@ -121,24 +136,17 @@ export class HomePage implements OnInit, OnDestroy {
     localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
   }
 
-  // Logout simplificado — cierra WS locales y navega directo
   logout() {
-    this.wsConnections.forEach(ws => {
-      try { ws.close(); } catch (e) {}
-    });
+    this.wsConnections.forEach(ws => { try { ws.close(); } catch (e) {} });
     this.wsConnections = [];
-    try {
-      this.webSocketService.disconnectAll();
-    } catch (e) {}
+    this.gpsService.detenerTracking();
+    try { this.webSocketService.disconnectAll(); } catch (e) {}
     this.authService.logout();
   }
 
   async presentToast(message: string, color: string) {
     const toast = await this.toastController.create({
-      message,
-      duration: 3000,
-      color,
-      position: 'top'
+      message, duration: 3000, color, position: 'top'
     });
     toast.present();
   }

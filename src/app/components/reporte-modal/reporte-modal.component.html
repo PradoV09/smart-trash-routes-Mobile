@@ -1,0 +1,153 @@
+<div style="
+  position: fixed; inset: 0;
+  background: rgba(0,29,57,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 9000;
+  display: flex; align-items: flex-end; justify-content: center;
+">
+  <div style="
+    width: 100%; max-width: 500px;
+    background: var(--bg-card);
+    border-radius: 24px 24px 0 0;
+    padding: 24px;
+    max-height: 90vh;
+    overflow-y: auto;
+  ">
+
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--primary-dark);">
+        🚨 Nuevo Reporte
+      </h2>
+      <button (click)="cerrar.emit()" style="
+        background: var(--bg-input); border: none; border-radius: 50%;
+        width: 36px; height: 36px; display: flex; align-items: center;
+        justify-content: center; cursor: pointer;
+      ">
+        <ion-icon name="close-outline" style="font-size: 20px; color: var(--text-muted);"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Asunto -->
+    <div class="form-group">
+      <label>Asunto <span style="color: #EF4444;">*</span></label>
+      <input
+        type="text"
+        class="form-control"
+        [(ngModel)]="asunto"
+        placeholder="Ej: Camión no enciende"
+        maxlength="100">
+      <p style="margin: 4px 0 0; font-size: 0.75rem; color: var(--text-muted);">
+        {{ asunto.length }}/100
+      </p>
+    </div>
+
+    <!-- Descripción -->
+    <div class="form-group">
+      <label>Descripción <span style="color: #EF4444;">*</span></label>
+      <textarea
+        class="form-control"
+        [(ngModel)]="descripcion"
+        placeholder="Describe detalladamente el problema..."
+        rows="3"
+        maxlength="1000"
+        style="resize: none; font-family: inherit;">
+      </textarea>
+      <p style="margin: 4px 0 0; font-size: 0.75rem; color: var(--text-muted);">
+        {{ descripcion.length }}/1000
+      </p>
+    </div>
+
+    <!-- Prioridad -->
+    <div class="form-group" style="margin-bottom: 20px;">
+      <label>Prioridad <span style="color: #EF4444;">*</span></label>
+      <div style="display: flex; gap: 10px; margin-top: 6px;">
+        <button (click)="prioridad = 'baja'"
+                [style.background]="prioridad === 'baja' ? '#10B981' : 'var(--bg-input)'"
+                [style.color]="prioridad === 'baja' ? 'white' : 'var(--text-muted)'"
+                [style.border]="prioridad === 'baja' ? 'none' : '1.5px solid var(--border-color)'"
+                style="flex: 1; padding: 10px 6px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 700;">
+          🟢 baja
+        </button>
+        <button (click)="prioridad = 'media'"
+                [style.background]="prioridad === 'media' ? '#F59E0B' : 'var(--bg-input)'"
+                [style.color]="prioridad === 'media' ? 'white' : 'var(--text-muted)'"
+                [style.border]="prioridad === 'media' ? 'none' : '1.5px solid var(--border-color)'"
+                style="flex: 1; padding: 10px 6px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 700;">
+          🟡 media
+        </button>
+        <button (click)="prioridad = 'alta'"
+                [style.background]="prioridad === 'alta' ? '#EF4444' : 'var(--bg-input)'"
+                [style.color]="prioridad === 'alta' ? 'white' : 'var(--text-muted)'"
+                [style.border]="prioridad === 'alta' ? 'none' : '1.5px solid var(--border-color)'"
+                style="flex: 1; padding: 10px 6px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 700;">
+          🔴 alta
+        </button>
+      </div>
+    </div>
+
+    <!-- Fotos -->
+    <div style="margin-bottom: 24px;">
+      <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.03em; text-transform: uppercase;">
+        Fotos ({{ fotos.length }}/5)
+      </label>
+
+      <!-- Grid fotos -->
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px;">
+        <div *ngFor="let f of fotos; let i = index" style="position: relative;">
+          <img [src]="f.preview" style="
+            width: 100%; aspect-ratio: 1;
+            object-fit: cover; border-radius: 10px;
+            border: 1.5px solid var(--border-color);
+          ">
+          <button (click)="quitarFoto(i)" style="
+            position: absolute; top: 4px; right: 4px;
+            background: rgba(0,0,0,0.6); border: none; border-radius: 50%;
+            width: 24px; height: 24px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer;
+          ">
+            <ion-icon name="close-outline" style="font-size: 14px; color: white;"></ion-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Botones cámara y galería -->
+      <div *ngIf="fotos.length < 5" style="display: flex; gap: 8px;">
+        <button (click)="abrirCamara()" style="
+          flex: 1; height: 56px;
+          background: var(--bg-input);
+          border: 2px dashed var(--border-color);
+          border-radius: 12px; cursor: pointer;
+          display: flex; align-items: center; justify-content: center; gap: 8px;
+          color: var(--text-muted); font-size: 0.85rem; font-weight: 600;
+        ">
+          <ion-icon name="camera-outline" style="font-size: 20px;"></ion-icon>
+          Cámara
+        </button>
+        <button (click)="abrirSelector()" style="
+          flex: 1; height: 56px;
+          background: var(--bg-input);
+          border: 2px dashed var(--border-color);
+          border-radius: 12px; cursor: pointer;
+          display: flex; align-items: center; justify-content: center; gap: 8px;
+          color: var(--text-muted); font-size: 0.85rem; font-weight: 600;
+        ">
+          <ion-icon name="image-outline" style="font-size: 20px;"></ion-icon>
+          Galería
+        </button>
+      </div>
+    </div>
+
+    <!-- Botón enviar -->
+    <button (click)="enviarReporte()" [disabled]="loading"
+            class="btn btn-primary"
+            style="width: 100%; justify-content: center; padding: 15px;">
+      <span *ngIf="!loading" style="display: flex; align-items: center; gap: 8px;">
+        <ion-icon name="send-outline" style="font-size: 18px;"></ion-icon>
+        Enviar Reporte
+      </span>
+      <div *ngIf="loading" class="loader-white"></div>
+    </button>
+
+  </div>
+</div>
