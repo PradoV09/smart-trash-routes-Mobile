@@ -12,7 +12,7 @@ export class AuthService {
   async login(username: string, password: string): Promise<any> {
     const body = new URLSearchParams();
     body.append('identifier', username);
-    body.append('contraseña', password);
+    body.append('contraseña', btoa(password));
 
     const data = await this.api.fetch(environment.apiConfig.endpoints.auth.login, {
       method: 'POST',
