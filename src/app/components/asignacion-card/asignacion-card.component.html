@@ -1,136 +1,192 @@
-<div class="admin-card" style="margin-bottom: 16px;">
+<div style="background: #1A2535; border: 0.5px solid #2A3A50; border-radius: 14px; overflow: hidden; margin: 0 16px 12px;">
 
-  <!-- Header -->
-  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+  <!-- HEADER -->
+  <div style="padding: 14px 14px 10px; display: flex; justify-content: space-between; align-items: flex-start;">
     <div style="display: flex; align-items: center; gap: 12px;">
       <div style="
-        width: 48px; height: 48px;
-        background: linear-gradient(135deg, #0A4174, #4E8EA2);
-        border-radius: 14px;
+        width: 40px; height: 40px;
+        background: #0F1923;
+        border-radius: 10px;
         display: flex; align-items: center; justify-content: center;
         flex-shrink: 0;
       ">
-        <ion-icon name="bus-outline" style="font-size: 24px; color: white;"></ion-icon>
+        <ion-icon name="bus-outline" style="font-size: 20px; color: #2dcecc;"></ion-icon>
       </div>
       <div>
-        <h2 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--primary-dark);">
+        <h2 style="margin: 0; font-size: 15px; font-weight: 700; color: white;">
           {{ asignacion.placa }}
         </h2>
-        <p style="margin: 2px 0 0; color: var(--text-muted); font-size: 0.85rem;">
-          {{ asignacion.modelo }}
+        <p style="margin: 2px 0 0; color: #8A9BBE; font-size: 12px;">
+          {{ asignacion.modelo }} · {{ asignacion.ruta_nombre || 'Sin ruta' }}
         </p>
       </div>
     </div>
 
-    <!-- Badge + botones -->
-    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-      <span class="badge {{ getBadgeClass(asignacion.estado) }}">
-        {{ formatEstado(asignacion.estado) }}
-      </span>
+    <!-- Badge de estado -->
+    <div [ngStyle]="{
+      background: asignacion.estado === 'pendiente' ? '#451a03' :
+                  asignacion.estado === 'completada' ? '#064e3b' :
+                  asignacion.estado === 'en_curso' ? '#1e3a5f' : '#1e3a5f',
+      color: asignacion.estado === 'pendiente' ? '#fcd34d' :
+             asignacion.estado === 'completada' ? '#6ee7b7' :
+             asignacion.estado === 'en_curso' ? '#93c5fd' : '#93c5fd',
+      padding: '4px 10px',
+      borderRadius: '6px',
+      fontSize: '11px',
+      fontWeight: '600',
+      textTransform: 'uppercase'
+    }">
+      {{ formatEstado(asignacion.estado) }}
+    </div>
+  </div>
+
+  <!-- BOTONES DE ACCIÓN -->
+  <div style="padding: 0 14px 12px; display: flex; gap: 6px;">
+    <!-- Para rutas PENDIENTES -->
+    <ng-container *ngIf="asignacion.estado === 'pendiente'">
+      <button (click)="onIniciar()" style="
+        flex: 2;
+        background: #064e3b;
+        color: #6ee7b7;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+      ">
+        <ion-icon name="play-outline" style="font-size: 16px;"></ion-icon>
+        Iniciar ruta
+      </button>
       <button (click)="onVerMapa()" style="
-        display: flex; align-items: center; gap: 5px;
-        background: linear-gradient(135deg, #0A4174, #4E8EA2);
-        color: white; border: none; border-radius: 8px;
-        padding: 5px 10px; font-size: 0.75rem; font-weight: 600;
-        cursor: pointer; box-shadow: 0 2px 8px rgba(10,65,116,0.3);
+        flex: 1;
+        background: #1e3a5f;
+        color: #93c5fd;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
       ">
-        <ion-icon name="map-outline" style="font-size: 13px;"></ion-icon>
-        Ver mapa
+        <ion-icon name="navigate-outline" style="font-size: 16px;"></ion-icon>
       </button>
-      <button (click)="mostrarReporte = true" style="
-        display: flex; align-items: center; gap: 5px;
-        background: linear-gradient(135deg, #EF4444, #B91C1C);
-        color: white; border: none; border-radius: 8px;
-        padding: 5px 10px; font-size: 0.75rem; font-weight: 600;
-        cursor: pointer; box-shadow: 0 2px 8px rgba(239,68,68,0.3);
+    </ng-container>
+
+    <!-- Para rutas COMPLETADAS -->
+    <ng-container *ngIf="asignacion.estado === 'completada'">
+      <button (click)="onVerMapa()" style="
+        flex: 1;
+        background: #1e3a5f;
+        color: #93c5fd;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
       ">
-        <ion-icon name="camera-outline" style="font-size: 13px;"></ion-icon>
-        Reportar
+        <ion-icon name="navigate-outline" style="font-size: 16px;"></ion-icon>
       </button>
-    </div>
+    </ng-container>
+
+    <!-- Para rutas EN CURSO -->
+    <ng-container *ngIf="asignacion.estado === 'en_curso'">
+      <button (click)="onFinalizar()" style="
+        flex: 2;
+        background: #064e3b;
+        color: #6ee7b7;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+      ">
+        <ion-icon name="checkmark-circle-outline" style="font-size: 16px;"></ion-icon>
+        Finalizar
+      </button>
+      <button (click)="onVerMapa()" style="
+        flex: 1;
+        background: #1e3a5f;
+        color: #93c5fd;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+      ">
+        <ion-icon name="navigate-outline" style="font-size: 16px;"></ion-icon>
+      </button>
+    </ng-container>
   </div>
 
-  <!-- Separador -->
-  <div style="height: 1px; background: var(--border-color); margin-bottom: 16px;"></div>
-
-  <!-- Detalles -->
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
-    <div style="background: var(--bg-input); border-radius: 12px; padding: 12px;">
-      <p style="margin: 0 0 4px; font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Capacidad</p>
-      <p style="margin: 0; font-size: 1rem; font-weight: 700; color: var(--primary-dark);">{{ asignacion.capacidad | number:'1.0-3' }} m³</p>
-    </div>
-    <div style="background: var(--bg-input); border-radius: 12px; padding: 12px;">
-      <p style="margin: 0 0 4px; font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Fecha</p>
-      <p style="margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--primary-dark);">{{ asignacion.fecha | date:'MMM d, y' }}</p>
-    </div>
+  <!-- BARRA DE PROGRESO -->
+  <div style="margin: 0 14px; height: 3px; border-radius: 2px; background: #2A3A50; overflow: hidden;">
+    <div [ngStyle]="{
+      width: getProgressWidth() + '%',
+      height: '100%',
+      background: '#2dcecc',
+      transition: 'width 0.3s ease'
+    }"></div>
   </div>
 
-  <!-- Tripulación -->
-  <div *ngIf="asignacion.tripulacion_nombre" style="
-    background: var(--bg-input); border-radius: 12px;
-    padding: 12px 14px; margin-bottom: 16px;
-    display: flex; align-items: center; gap: 10px;
-  ">
-    <ion-icon name="people-outline" style="font-size: 20px; color: var(--accent); flex-shrink: 0;"></ion-icon>
+  <!-- DIVIDER -->
+  <div style="height: 0.5px; background: #2A3A50; margin: 0;"></div>
+
+  <!-- METADATOS -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 14px;">
     <div>
-      <p style="margin: 0 0 2px; font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Tripulación</p>
-      <p style="margin: 0; font-size: 0.9rem; font-weight: 600; color: var(--primary-dark);">{{ asignacion.tripulacion_nombre }}</p>
+      <p style="margin: 0 0 4px; font-size: 10px; color: #8A9BBE; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Capacidad</p>
+      <p style="margin: 0; font-size: 13px; font-weight: 700; color: white;">{{ asignacion.capacidad | number:'1.0-3' }} m³</p>
     </div>
+    <div>
+      <p style="margin: 0 0 4px; font-size: 10px; color: #8A9BBE; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Fecha</p>
+      <p style="margin: 0; font-size: 13px; font-weight: 700; color: white;">{{ asignacion.fecha | date:'d MMM' }}</p>
+    </div>
+  </div>
+
+  <!-- TRIPULACIÓN -->
+  <div *ngIf="asignacion.tripulacion_nombre || (asignacion.tripulantes && asignacion.tripulantes.length > 0)"
+       style="padding: 0 14px 12px; display: flex; align-items: center; gap: 8px;">
+    <ion-icon name="people-outline" style="font-size: 18px; color: #8A9BBE; flex-shrink: 0;"></ion-icon>
+    <span style="font-size: 11px; color: #8A9BBE;">
+      Tripulación {{ asignacion.tripulacion_nombre || '' }}
+    </span>
     <div *ngIf="asignacion.tripulantes && asignacion.tripulantes.length > 0"
-         style="margin-left: auto; display: flex; gap: 4px;">
-      <div *ngFor="let m of asignacion.tripulantes | slice:0:3"
+         style="margin-left: auto; display: flex; gap: 6px;">
+      <div *ngFor="let m of asignacion.tripulantes | slice:0:4; let i = index"
            [title]="m.username + ' (' + m.rol_tripulacion + ')'"
-           style="
-             width: 30px; height: 30px;
-             background: linear-gradient(135deg, var(--c3), var(--c4));
-             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-             font-size: 0.7rem; font-weight: 700; color: white;
-             border: 2px solid var(--bg-card);
-           ">
+           [ngStyle]="{
+             width: '26px',
+             height: '26px',
+             background: getAvatarColor(i),
+             borderRadius: '50%',
+             display: 'flex',
+             alignItems: 'center',
+             justifyContent: 'center',
+             fontSize: '10px',
+             fontWeight: '700',
+             color: 'white'
+           }">
         {{ m.username.charAt(0).toUpperCase() }}
       </div>
     </div>
   </div>
 
-  <!-- Hora salida -->
-  <div *ngIf="asignacion.estado === 'en_curso' && asignacion.hora_salida"
-       style="
-         background: rgba(78,142,162,0.1); border: 1px solid rgba(78,142,162,0.3);
-         border-radius: 10px; padding: 8px 12px; margin-bottom: 16px;
-         display: flex; align-items: center; gap: 8px;
-       ">
-    <ion-icon name="time-outline" style="color: var(--accent); font-size: 16px;"></ion-icon>
-    <span style="font-size: 0.85rem; color: var(--accent); font-weight: 600;">
-      Salida: {{ asignacion.hora_salida | date:'h:mm a' }}
+  <!-- FOOTER (solo en completadas) -->
+  <div *ngIf="asignacion.estado === 'completada'"
+       style="background: #0F1923; padding: 10px 14px; display: flex; align-items: center; gap: 8px;">
+    <ion-icon name="checkmark-circle-outline" style="font-size: 16px; color: #10B981;"></ion-icon>
+    <span style="font-size: 12px; color: white;">
+      Recorrido completado · <span style="color: #2dcecc;">{{ asignacion.ruta_nombre || 'Ruta' }}</span>
     </span>
   </div>
 
-  <!-- Botones acción -->
-  <div style="display: flex; gap: 10px;">
-    <button *ngIf="asignacion.estado === 'pendiente'"
-            class="btn btn-primary" style="flex: 1; justify-content: center;"
-            (click)="onIniciar()">
-      <ion-icon name="play-outline"></ion-icon>
-      Iniciar Recorrido
-    </button>
-    <button *ngIf="asignacion.estado === 'en_curso'"
-            class="btn btn-success" style="flex: 1; justify-content: center;"
-            (click)="onFinalizar()">
-      <ion-icon name="checkmark-circle-outline"></ion-icon>
-      Finalizar Recorrido
-    </button>
-    <div *ngIf="asignacion.estado === 'completada' || asignacion.estado === 'cancelada'"
-         style="flex: 1; text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 10px;">
-      {{ asignacion.estado === 'completada' ? '✓ Recorrido completado' : '✕ Asignación cancelada' }}
-    </div>
-  </div>
-
 </div>
-
-<!-- Modal reporte -->
-<app-reporte-modal
-  *ngIf="mostrarReporte"
-  [idAsignacion]="asignacion.id"
-  (cerrar)="mostrarReporte = false"
-  (enviado)="mostrarReporte = false">
-</app-reporte-modal>

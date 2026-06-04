@@ -9,6 +9,7 @@ import { GpsService } from '../../services/gps.service';
 import { AsignacionCardComponent } from '../../components/asignacion-card/asignacion-card.component';
 import { SkeletonCardComponent } from '../../components/skeleton-card/skeleton-card.component';
 import { WebSocketService } from '../../services/websocket.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-home',
@@ -23,6 +24,33 @@ export class HomePage implements OnInit, OnDestroy {
   isDark = false;
   private serverErrorListener: any;
   private wsConnections: WebSocket[] = [];
+
+  // KPIs
+  get completadas(): number {
+    return this.asignaciones.filter(a => a.estado === 'completada').length;
+  }
+  get pendientes(): number {
+    return this.asignaciones.filter(a => a.estado === 'pendiente' || a.estado === 'en_curso').length;
+  }
+  get total(): number {
+    return this.asignaciones.length;
+  }
+
+  // Date formatting
+  get currentDate(): string {
+    const now = new Date();
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'short' };
+    return now.toLocaleDateString('es-ES', options);
+  }
+
+  // Separated assignments
+  get asignacionesPendientes(): Asignacion[] {
+    return this.asignaciones.filter(a => a.estado === 'pendiente' || a.estado === 'en_curso');
+  }
+  get asignacionesCompletadas(): Asignacion[] {
+    return this.asignaciones.filter(a => a.estado === 'completada');
+  }
+
 
   constructor(
     private asignacionesService: AsignacionesService,
@@ -65,7 +93,7 @@ export class HomePage implements OnInit, OnDestroy {
     asignaciones.forEach(a => {
       if (a.estado === 'completada' || a.estado === 'cancelada') return;
       const ws = new WebSocket(
-        `wss://smart-trash-backend-production.up.railway.app/ws/asignacion/${a.id}?token=${token}`
+        `${environment.apiConfig.websockets.baseUrl}/ws/asignacion/${a.id}?token=${token}`
       );
       ws.onmessage = (event) => {
         try {
@@ -136,7 +164,13 @@ export class HomePage implements OnInit, OnDestroy {
     localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
   }
 
-  logout() {
+  async logout() {
+    const enCurso = this.asignaciones.find(a => a.estado === 'en_curso');
+    if (enCurso) {
+      this.presentToast('No puedes cerrar sesión con una ruta en curso', 'warning');
+      return;
+    }
+
     this.wsConnections.forEach(ws => { try { ws.close(); } catch (e) {} });
     this.wsConnections = [];
     this.gpsService.detenerTracking();
@@ -149,5 +183,10 @@ export class HomePage implements OnInit, OnDestroy {
       message, duration: 3000, color, position: 'top'
     });
     toast.present();
+  }
+
+  async doRefresh(event: any) {
+    await this.cargarAsignaciones();
+    event.target.complete();
   }
 }

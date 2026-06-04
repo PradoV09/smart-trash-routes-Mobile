@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  private BASE_URL = 'https://smart-trash-backend-production.up.railway.app';
+  private BASE_URL = environment.apiConfig.baseUrl;
 
   constructor(private router: Router) {}
 
@@ -49,6 +50,7 @@ export class ApiService {
 
       return data;
     } catch (error) {
+      console.error('API fetch error:', error);
       throw error;
     }
   }

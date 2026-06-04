@@ -4,8 +4,9 @@ import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import * as L from 'leaflet';
 import { addIcons } from 'ionicons';
-import { arrowBackOutline, locateOutline, moonOutline, sunnyOutline, searchOutline, closeOutline, gitBranchOutline, trashOutline, navigateOutline, flagOutline } from 'ionicons/icons';
+import { arrowBackOutline, locateOutline, moonOutline, sunnyOutline, searchOutline, closeOutline, gitBranchOutline, trashOutline, navigateOutline, flagOutline, alertOutline } from 'ionicons/icons';
 import { AsignacionesService } from '../../services/asignaciones.service';
+import { ReporteModalComponent } from '../../components/reporte-modal/reporte-modal.component';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -19,7 +20,7 @@ L.Icon.Default.mergeOptions({
   templateUrl: './map.page.html',
   styleUrls: ['./map.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, NgIf, FormsModule]
+  imports: [IonicModule, CommonModule, NgIf, FormsModule, ReporteModalComponent]
 })
 export class MapPage implements OnDestroy {
   @ViewChild('mapElement', { static: false }) mapElement!: ElementRef;
@@ -40,11 +41,15 @@ export class MapPage implements OnDestroy {
   routeInfo = '';
   rutaNombre = '';
   tieneRutaAsignada = false;
+  rutaEnCurso = false;
+  mostrarReporte = false;
+  idAsignacionEnCurso: string | number | undefined = undefined;
+  asignacionActivaId: string | number | undefined = undefined;
 
   private readonly CENTER: L.LatLngExpression = [3.8772, -77.0282];
 
   constructor(private asignacionesService: AsignacionesService) {
-    addIcons({ arrowBackOutline, locateOutline, moonOutline, sunnyOutline, searchOutline, closeOutline, gitBranchOutline, trashOutline, navigateOutline, flagOutline });
+    addIcons({ arrowBackOutline, locateOutline, moonOutline, sunnyOutline, searchOutline, closeOutline, gitBranchOutline, trashOutline, navigateOutline, flagOutline, alertOutline });
     this.isDark = localStorage.getItem('theme') === 'dark';
   }
 
@@ -138,6 +143,9 @@ export class MapPage implements OnDestroy {
       this.inicioRutaPoint = latlngs[0];
       this.tieneRutaAsignada = true;
 
+      // Set asignacionActivaId for report button
+      this.asignacionActivaId = activa.id;
+
       if (this.rutaAsignadaLayer) {
         this.map.removeLayer(this.rutaAsignadaLayer);
       }
@@ -181,12 +189,22 @@ export class MapPage implements OnDestroy {
     try {
       const asignaciones = await this.asignacionesService.getAsignaciones();
       const enCurso = asignaciones.find(a => a.estado === 'en_curso' && a.id_recorrido);
-      if (!enCurso || !enCurso.id_recorrido) return;
+      if (!enCurso || !enCurso.id_recorrido) {
+        this.rutaEnCurso = false;
+        this.idAsignacionEnCurso = undefined;
+        return;
+      }
+
+      this.rutaEnCurso = true;
+      this.idAsignacionEnCurso = enCurso.id;
+      this.asignacionActivaId = enCurso.id;
 
       const posiciones = await this.asignacionesService.getPosicionesRecorrido(enCurso.id_recorrido);
       if (!posiciones || posiciones.length < 2) return;
 
-      const latlngs: L.LatLngExpression[] = posiciones.map(p => [p.lat, p.lon]);
+      // Show only last 50 positions to avoid cluttering the map
+      const ultimasPosiciones = posiciones.slice(-50);
+      const latlngs: L.LatLngExpression[] = ultimasPosiciones.map(p => [p.lat, p.lon]);
 
       if (this.recorridoLayer) {
         this.map.removeLayer(this.recorridoLayer);
@@ -393,4 +411,28 @@ export class MapPage implements OnDestroy {
   }
 
   goBack() { window.location.href = '/home'; }
+
+  async onReporteEnviado() {
+    this.mostrarReporte = false;
+  }
+
+  async onReporteCerrado() {
+    this.mostrarReporte = false;
+  }
+
+  async abrirReporte() {
+    // Ensure we have the active assignment ID before opening modal
+    if (!this.asignacionActivaId) {
+      try {
+        const asignaciones = await this.asignacionesService.getAsignaciones();
+        const activa = asignaciones.find(a => a.estado === 'en_curso' || a.estado === 'pendiente');
+        if (activa) {
+          this.asignacionActivaId = activa.id;
+        }
+      } catch (e) {
+        console.error('Error al obtener asignación activa:', e);
+      }
+    }
+    this.mostrarReporte = true;
+  }
 }

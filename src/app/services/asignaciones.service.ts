@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
+import { environment } from '../../environments/environment';
 
 export interface Tripulante {
   id: number;
@@ -125,7 +126,7 @@ export class AsignacionesService {
 
   async enviarPosicionExterna(idRecorrido: string, lat: number, lon: number): Promise<any> {
     const token = localStorage.getItem('access_token');
-    return fetch(`https://smart-trash-backend-production.up.railway.app/api/recorridos/${idRecorrido}/posiciones`, {
+    return fetch(`${environment.apiConfig.baseUrl}/api/recorridos/${idRecorrido}/posiciones`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -136,7 +137,7 @@ export class AsignacionesService {
   }
 
   async getPosicionesRecorrido(idRecorrido: string): Promise<{ lat: number; lon: number; timestamp: string }[]> {
-    const res = await fetch(`https://smart-trash-backend-production.up.railway.app/api/recorridos/${idRecorrido}/posiciones`);
+    const res = await fetch(`${environment.apiConfig.baseUrl}/api/recorridos/${idRecorrido}/posiciones`);
     const data = await res.json();
     return data?.data || [];
   }

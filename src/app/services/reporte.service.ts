@@ -2,14 +2,15 @@ import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 
 export interface FotoReporte {
-  nombre: string;
-  base64: string;
+  imagen_base64: string;
 }
 
 export interface ReporteRequest {
   asunto: string;
   descripcion: string;
   estado: 'baja' | 'media' | 'alta';
+  latitud: number;
+  longitud: number;
   fotos?: FotoReporte[];
   id_asignacion?: number | string;
 }

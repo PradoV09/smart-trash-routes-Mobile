@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   apiConfig: {
-    baseUrl: 'https://smart-trash-backend-production.up.railway.app',
+    baseUrl: 'http://localhost:8000',
     endpoints: {
       auth: {
         login: '/api/auth/login',
@@ -24,7 +24,7 @@ export const environment = {
       }
     },
     websockets: {
-      baseUrl: 'wss://smart-trash-backend-production.up.railway.app',
+      baseUrl: 'ws://localhost:8000',
       endpoints: {
         asignacion: (id: string) => `/ws/asignacion/${id}`
       }
