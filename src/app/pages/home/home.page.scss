@@ -1,0 +1,34 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Mejorar interacción touch en el dashboard */
+ion-content {
+  touch-action: auto !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Asegurar que el contenedor principal permita scroll */
+div[style*="min-height: 100vh"] {
+  touch-action: auto !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Mejorar respuesta de botones */
+button {
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+/* Asegurar que las cards permitan interacción */
+app-asignacion-card {
+  touch-action: auto !important;
+}

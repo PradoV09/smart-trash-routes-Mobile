@@ -9,9 +9,31 @@
   to { transform: rotate(360deg); }
 }
 
+/* Mejorar interacción touch en botones flotantes del mapa */
+button {
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  pointer-events: auto !important;
+}
+
+/* Permitir interacción con el mapa Leaflet */
+.leaflet-container {
+  touch-action: auto !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Asegurar que el mapa reciba eventos touch */
+#mapElement {
+  touch-action: auto !important;
+  pointer-events: auto !important;
+}
+
 .leaflet-control-zoom {
   border: none !important;
   box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+  pointer-events: auto !important;
 
   a {
     width: 40px !important;
@@ -21,5 +43,7 @@
     border-radius: 10px !important;
     color: #001D39 !important;
     font-weight: 700 !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
   }
 }

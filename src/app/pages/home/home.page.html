@@ -1,46 +1,53 @@
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" style="touch-action: auto !important;">
   <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
-  <div style="background: #0F1923; min-height: 100vh; padding: 16px 16px 32px;">
+  <div style="background: var(--bg-color); min-height: 100vh; padding: 16px 16px 32px; touch-action: auto !important;">
 
     <!-- TOPBAR -->
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
       <div>
-        <h1 style="color: white; font-weight: 700; font-size: 18px; margin: 0;">
+        <h1 style="color: var(--text-main); font-weight: 700; font-size: 18px; margin: 0;">
           Mis asignaciones
         </h1>
-        <p style="margin: 4px 0 0; color: #8A9BBE; font-size: 13px;">
+        <p style="margin: 4px 0 0; color: var(--text-muted); font-size: 14px; font-weight: 500;">
           {{ currentDate }} · {{ total }} ruta{{ total !== 1 ? 's' : '' }}
         </p>
       </div>
       <div style="display: flex; gap: 12px; align-items: center;">
-        <button (click)="logout()" style="
-          width: 34px; height: 34px;
+        <button (click)="logout()" title="Cerrar sesión" style="
+          width: auto;
+          height: 40px;
+          padding: 0 16px;
           background: #3b0a0a;
-          border: none;
-          border-radius: 50%;
-          display: flex; align-items: center; justify-content: center;
+          border: 1px solid #7f1d1d;
+          border-radius: 8px;
+          display: flex; align-items: center; justify-content: center; gap: 8px;
           cursor: pointer;
-        ">
-          <ion-icon name="log-out-outline" style="font-size: 18px; color: #fca5a5;"></ion-icon>
+          transition: all 0.2s ease;
+        " onmouseover="this.style.background='#7f1d1d'" onmouseout="this.style.background='#3b0a0a'">
+          <ion-icon name="log-out-outline" style="font-size: 20px; color: #fca5a5;"></ion-icon>
+          <span style="color: #fca5a5; font-size: 13px; font-weight: 600;">Salir</span>
         </button>
       </div>
     </div>
 
     <!-- KPI CARDS -->
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px;">
-      <div style="background: #1A2535; border-radius: 10px; padding: 10px 12px; text-align: center;">
+      <div style="background: var(--bg-card); border-radius: 10px; padding: 12px 10px; text-align: center; border: 1px solid var(--border-color);">
+        <ion-icon name="checkmark-circle-outline" style="font-size: 20px; color: #10B981; margin-bottom: 4px; display: block;"></ion-icon>
         <p style="margin: 0; font-size: 24px; font-weight: 700; color: #10B981;">{{ completadas }}</p>
-        <p style="margin: 4px 0 0; font-size: 11px; color: #8A9BBE; text-transform: uppercase;">Completadas</p>
+        <p style="margin: 4px 0 0; font-size: 13px; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Completadas</p>
       </div>
-      <div style="background: #1A2535; border-radius: 10px; padding: 10px 12px; text-align: center;">
-        <p style="margin: 0; font-size: 24px; font-weight: 700; color: #F59E0B;">{{ pendientes }}</p>
-        <p style="margin: 4px 0 0; font-size: 11px; color: #8A9BBE; text-transform: uppercase;">Pendientes</p>
+      <div style="background: var(--bg-card); border-radius: 10px; padding: 12px 10px; text-align: center; border: 1px solid var(--border-color);">
+        <ion-icon name="time-outline" [ngStyle]="{color: pendientes === 0 ? '#6B7280' : '#F59E0B'}" style="font-size: 20px; margin-bottom: 4px; display: block;"></ion-icon>
+        <p [ngStyle]="{color: pendientes === 0 ? '#6B7280' : '#F59E0B'}" style="margin: 0; font-size: 24px; font-weight: 700;">{{ pendientes }}</p>
+        <p style="margin: 4px 0 0; font-size: 13px; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Pendientes</p>
       </div>
-      <div style="background: #1A2535; border-radius: 10px; padding: 10px 12px; text-align: center;">
+      <div style="background: var(--bg-card); border-radius: 10px; padding: 12px 10px; text-align: center; border: 1px solid var(--border-color);">
+        <ion-icon name="list-outline" style="font-size: 20px; color: white; margin-bottom: 4px; display: block;"></ion-icon>
         <p style="margin: 0; font-size: 24px; font-weight: 700; color: white;">{{ total }}</p>
-        <p style="margin: 4px 0 0; font-size: 11px; color: #8A9BBE; text-transform: uppercase;">Total</p>
+        <p style="margin: 4px 0 0; font-size: 13px; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Total</p>
       </div>
     </div>
 
@@ -51,16 +58,16 @@
 
     <!-- Vacío -->
     <div *ngIf="asignaciones.length === 0 && !loading && !isInitialLoading"
-         style="text-align: center; padding: 48px 24px; background: #1A2535; border-radius: 20px; border: 0.5px solid #2A3A50;">
-      <ion-icon name="clipboard-outline" style="font-size: 48px; color: #8A9BBE; margin-bottom: 12px; display: block;"></ion-icon>
-      <p style="margin: 0; color: #8A9BBE; font-size: 1rem; font-weight: 600;">
+         style="text-align: center; padding: 48px 24px; background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border-color);">
+      <ion-icon name="clipboard-outline" style="font-size: 48px; color: var(--text-muted); margin-bottom: 12px; display: block;"></ion-icon>
+      <p style="margin: 0; color: var(--text-muted); font-size: 1rem; font-weight: 600;">
         No tienes asignaciones registradas
       </p>
     </div>
 
     <!-- PENDIENTE HOY -->
     <div *ngIf="asignacionesPendientes.length > 0">
-      <p style="margin: 0 0 12px; font-size: 11px; color: #8A9BBE; text-transform: uppercase; font-weight: 600; letter-spacing: 0.04em;">
+      <p style="margin: 0 0 12px; font-size: 14px; color: #F59E0B; text-transform: uppercase; font-weight: 700; letter-spacing: 0.04em;">
         Pendiente hoy
       </p>
       <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -75,7 +82,7 @@
 
     <!-- COMPLETADAS -->
     <div *ngIf="asignacionesCompletadas.length > 0" style="margin-top: 24px;">
-      <p style="margin: 0 0 12px; font-size: 11px; color: #8A9BBE; text-transform: uppercase; font-weight: 600; letter-spacing: 0.04em;">
+      <p style="margin: 0 0 12px; font-size: 14px; color: #10B981; text-transform: uppercase; font-weight: 700; letter-spacing: 0.04em;">
         Completadas
       </p>
       <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -92,9 +99,9 @@
 
   <!-- Loading overlay -->
   <div *ngIf="loading" class="modal-overlay">
-    <div style="background: #1A2535; padding: 24px 40px; border-radius: 16px; display: flex; align-items: center; gap: 14px; border: 0.5px solid #2A3A50;">
+    <div style="background: var(--bg-card); padding: 24px 40px; border-radius: 16px; display: flex; align-items: center; gap: 14px; border: 1px solid var(--border-color);">
       <div class="loader-primary"></div>
-      <span style="color: white; font-weight: 600;">Procesando...</span>
+      <span style="color: var(--text-main); font-weight: 600;">Procesando...</span>
     </div>
   </div>
 

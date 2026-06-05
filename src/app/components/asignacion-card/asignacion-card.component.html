@@ -1,22 +1,24 @@
-<div style="background: #1A2535; border: 0.5px solid #2A3A50; border-radius: 14px; overflow: hidden; margin: 0 16px 12px;">
+<div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; overflow: hidden; margin: 0 16px 12px;">
 
   <!-- HEADER -->
-  <div style="padding: 14px 14px 10px; display: flex; justify-content: space-between; align-items: flex-start;">
-    <div style="display: flex; align-items: center; gap: 12px;">
+  <div style="padding: 16px 16px 12px; display: flex; justify-content: space-between; align-items: flex-start;">
+    <div style="display: flex; align-items: center; gap: 14px;">
       <div style="
-        width: 40px; height: 40px;
-        background: #0F1923;
-        border-radius: 10px;
+        width: 48px; height: 48px;
+        background: linear-gradient(135deg, var(--bg-input) 0%, var(--bg-card) 100%);
+        border: 2px solid var(--accent);
+        border-radius: 12px;
         display: flex; align-items: center; justify-content: center;
         flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(78, 142, 162, 0.2);
       ">
-        <ion-icon name="bus-outline" style="font-size: 20px; color: #2dcecc;"></ion-icon>
+        <ion-icon name="bus-outline" style="font-size: 24px; color: var(--accent);"></ion-icon>
       </div>
       <div>
-        <h2 style="margin: 0; font-size: 15px; font-weight: 700; color: white;">
+        <h2 style="margin: 0; font-size: 17px; font-weight: 700; color: var(--text-main);">
           {{ asignacion.placa }}
         </h2>
-        <p style="margin: 2px 0 0; color: #8A9BBE; font-size: 12px;">
+        <p style="margin: 3px 0 0; color: var(--text-muted); font-size: 14px; font-weight: 500;">
           {{ asignacion.modelo }} · {{ asignacion.ruta_nombre || 'Sin ruta' }}
         </p>
       </div>
@@ -24,16 +26,14 @@
 
     <!-- Badge de estado -->
     <div [ngStyle]="{
-      background: asignacion.estado === 'pendiente' ? '#451a03' :
-                  asignacion.estado === 'completada' ? '#064e3b' :
-                  asignacion.estado === 'en_curso' ? '#1e3a5f' : '#1e3a5f',
-      color: asignacion.estado === 'pendiente' ? '#fcd34d' :
-             asignacion.estado === 'completada' ? '#6ee7b7' :
-             asignacion.estado === 'en_curso' ? '#93c5fd' : '#93c5fd',
-      padding: '4px 10px',
-      borderRadius: '6px',
-      fontSize: '11px',
-      fontWeight: '600',
+      background: asignacion.estado === 'pendiente' ? 'var(--status-pending)' :
+                  asignacion.estado === 'completada' ? 'var(--status-done)' :
+                  asignacion.estado === 'en_curso' ? 'var(--status-active)' : '#6B7280',
+      color: 'white',
+      padding: '6px 12px',
+      borderRadius: '8px',
+      fontSize: '12px',
+      fontWeight: '700',
       textTransform: 'uppercase'
     }">
       {{ formatEstado(asignacion.estado) }}
@@ -41,13 +41,13 @@
   </div>
 
   <!-- BOTONES DE ACCIÓN -->
-  <div style="padding: 0 14px 12px; display: flex; gap: 6px;">
+  <div style="padding: 0 16px 14px; display: flex; gap: 8px;">
     <!-- Para rutas PENDIENTES -->
     <ng-container *ngIf="asignacion.estado === 'pendiente'">
-      <button (click)="onIniciar()" style="
+      <button (click)="onIniciar()" title="Iniciar recorrido de la ruta" style="
         flex: 2;
-        background: #064e3b;
-        color: #6ee7b7;
+        background: var(--status-done);
+        color: white;
         border: none;
         border-radius: 8px;
         padding: 8px 12px;
@@ -59,46 +59,48 @@
         <ion-icon name="play-outline" style="font-size: 16px;"></ion-icon>
         Iniciar ruta
       </button>
-      <button (click)="onVerMapa()" style="
+      <button (click)="onVerMapa()" title="Ver ruta en el mapa" style="
         flex: 1;
-        background: #1e3a5f;
-        color: #93c5fd;
+        background: #378ADD;
+        color: #FFFFFF;
         border: none;
         border-radius: 8px;
         padding: 8px 12px;
         font-size: 13px;
         font-weight: 600;
         cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
       ">
-        <ion-icon name="navigate-outline" style="font-size: 16px;"></ion-icon>
+        <ion-icon name="map-outline" style="font-size: 16px;"></ion-icon>
+        Ver mapa
       </button>
     </ng-container>
 
     <!-- Para rutas COMPLETADAS -->
     <ng-container *ngIf="asignacion.estado === 'completada'">
-      <button (click)="onVerMapa()" style="
+      <button (click)="onVerMapa()" title="Ver ruta en el mapa" style="
         flex: 1;
-        background: #1e3a5f;
-        color: #93c5fd;
+        background: #378ADD;
+        color: #FFFFFF;
         border: none;
         border-radius: 8px;
         padding: 8px 12px;
         font-size: 13px;
         font-weight: 600;
         cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
       ">
-        <ion-icon name="navigate-outline" style="font-size: 16px;"></ion-icon>
+        <ion-icon name="map-outline" style="font-size: 16px;"></ion-icon>
+        Ver mapa
       </button>
     </ng-container>
 
     <!-- Para rutas EN CURSO -->
     <ng-container *ngIf="asignacion.estado === 'en_curso'">
-      <button (click)="onFinalizar()" style="
+      <button (click)="onFinalizar()" title="Finalizar recorrido de la ruta" style="
         flex: 2;
-        background: #064e3b;
-        color: #6ee7b7;
+        background: var(--status-done);
+        color: white;
         border: none;
         border-radius: 8px;
         padding: 8px 12px;
@@ -110,70 +112,73 @@
         <ion-icon name="checkmark-circle-outline" style="font-size: 16px;"></ion-icon>
         Finalizar
       </button>
-      <button (click)="onVerMapa()" style="
+      <button (click)="onVerMapa()" title="Ver ruta en el mapa" style="
         flex: 1;
-        background: #1e3a5f;
-        color: #93c5fd;
+        background: #378ADD;
+        color: #FFFFFF;
         border: none;
         border-radius: 8px;
         padding: 8px 12px;
         font-size: 13px;
         font-weight: 600;
         cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
       ">
-        <ion-icon name="navigate-outline" style="font-size: 16px;"></ion-icon>
+        <ion-icon name="map-outline" style="font-size: 16px;"></ion-icon>
+        Ver mapa
       </button>
     </ng-container>
   </div>
 
   <!-- BARRA DE PROGRESO -->
-  <div style="margin: 0 14px; height: 3px; border-radius: 2px; background: #2A3A50; overflow: hidden;">
+  <div style="margin: 0 14px; height: 3px; border-radius: 2px; background: var(--border-color); overflow: hidden;">
     <div [ngStyle]="{
       width: getProgressWidth() + '%',
       height: '100%',
-      background: '#2dcecc',
+      background: 'var(--accent)',
       transition: 'width 0.3s ease'
     }"></div>
   </div>
 
   <!-- DIVIDER -->
-  <div style="height: 0.5px; background: #2A3A50; margin: 0;"></div>
+  <div style="height: 0.5px; background: var(--border-color); margin: 0;"></div>
 
   <!-- METADATOS -->
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 14px;">
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 14px 16px;">
     <div>
-      <p style="margin: 0 0 4px; font-size: 10px; color: #8A9BBE; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Capacidad</p>
-      <p style="margin: 0; font-size: 13px; font-weight: 700; color: white;">{{ asignacion.capacidad | number:'1.0-3' }} m³</p>
+      <p style="margin: 0 0 4px; font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">Capacidad</p>
+      <p style="margin: 0; font-size: 14px; font-weight: 700; color: var(--text-main);">{{ asignacion.capacidad | number:'1.0-3' }} m³</p>
     </div>
     <div>
-      <p style="margin: 0 0 4px; font-size: 10px; color: #8A9BBE; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Fecha</p>
-      <p style="margin: 0; font-size: 13px; font-weight: 700; color: white;">{{ asignacion.fecha | date:'d MMM' }}</p>
+      <p style="margin: 0 0 4px; font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">Fecha</p>
+      <p style="margin: 0; font-size: 14px; font-weight: 700; color: var(--text-main);">{{ asignacion.fecha | date:'d MMM' }}</p>
     </div>
   </div>
 
   <!-- TRIPULACIÓN -->
   <div *ngIf="asignacion.tripulacion_nombre || (asignacion.tripulantes && asignacion.tripulantes.length > 0)"
-       style="padding: 0 14px 12px; display: flex; align-items: center; gap: 8px;">
-    <ion-icon name="people-outline" style="font-size: 18px; color: #8A9BBE; flex-shrink: 0;"></ion-icon>
-    <span style="font-size: 11px; color: #8A9BBE;">
+       style="padding: 0 16px 14px; display: flex; align-items: center; gap: 10px;">
+    <ion-icon name="people-outline" style="font-size: 20px; color: var(--text-muted); flex-shrink: 0;"></ion-icon>
+    <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">
       Tripulación {{ asignacion.tripulacion_nombre || '' }}
     </span>
     <div *ngIf="asignacion.tripulantes && asignacion.tripulantes.length > 0"
-         style="margin-left: auto; display: flex; gap: 6px;">
+         style="margin-left: auto; display: flex; gap: 8px;">
       <div *ngFor="let m of asignacion.tripulantes | slice:0:4; let i = index"
            [title]="m.username + ' (' + m.rol_tripulacion + ')'"
            [ngStyle]="{
-             width: '26px',
-             height: '26px',
+             width: '32px',
+             height: '32px',
              background: getAvatarColor(i),
              borderRadius: '50%',
              display: 'flex',
              alignItems: 'center',
              justifyContent: 'center',
-             fontSize: '10px',
+             fontSize: '12px',
              fontWeight: '700',
-             color: 'white'
+             color: 'white',
+             border: '2px solid var(--bg-card)',
+             cursor: 'pointer'
            }">
         {{ m.username.charAt(0).toUpperCase() }}
       </div>
@@ -182,10 +187,10 @@
 
   <!-- FOOTER (solo en completadas) -->
   <div *ngIf="asignacion.estado === 'completada'"
-       style="background: #0F1923; padding: 10px 14px; display: flex; align-items: center; gap: 8px;">
-    <ion-icon name="checkmark-circle-outline" style="font-size: 16px; color: #10B981;"></ion-icon>
-    <span style="font-size: 12px; color: white;">
-      Recorrido completado · <span style="color: #2dcecc;">{{ asignacion.ruta_nombre || 'Ruta' }}</span>
+       style="background: var(--bg-input); padding: 12px 16px; display: flex; align-items: center; gap: 10px;">
+    <ion-icon name="checkmark-circle-outline" style="font-size: 18px; color: var(--status-done);"></ion-icon>
+    <span style="font-size: 13px; color: var(--text-main); font-weight: 500;">
+      Recorrido completado · <span style="color: var(--accent); font-weight: 600; cursor: pointer;">{{ asignacion.ruta_nombre || 'Ruta' }}</span>
     </span>
   </div>
 

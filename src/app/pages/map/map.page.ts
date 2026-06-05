@@ -4,7 +4,7 @@ import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import * as L from 'leaflet';
 import { addIcons } from 'ionicons';
-import { arrowBackOutline, locateOutline, moonOutline, sunnyOutline, searchOutline, closeOutline, gitBranchOutline, trashOutline, navigateOutline, flagOutline, alertOutline } from 'ionicons/icons';
+import { arrowBackOutline, locateOutline, moonOutline, sunnyOutline, searchOutline, closeOutline, gitBranchOutline, trashOutline, navigateOutline, flagOutline, alertOutline, sendOutline, mapOutline, locationOutline } from 'ionicons/icons';
 import { AsignacionesService } from '../../services/asignaciones.service';
 import { ReporteModalComponent } from '../../components/reporte-modal/reporte-modal.component';
 
@@ -13,6 +13,10 @@ L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
 
 @Component({
@@ -32,6 +36,8 @@ export class MapPage implements OnDestroy {
   private recorridoLayer?: L.Polyline;
   private guiaLayer?: L.Polyline;
   private inicioRutaPoint?: L.LatLngExpression;
+  private watchId?: number;
+  private lastPosition?: L.LatLngExpression;
 
   isDark = false;
   coordsInfo = '';
@@ -49,7 +55,7 @@ export class MapPage implements OnDestroy {
   private readonly CENTER: L.LatLngExpression = [3.8772, -77.0282];
 
   constructor(private asignacionesService: AsignacionesService) {
-    addIcons({ arrowBackOutline, locateOutline, moonOutline, sunnyOutline, searchOutline, closeOutline, gitBranchOutline, trashOutline, navigateOutline, flagOutline, alertOutline });
+    addIcons({ arrowBackOutline, locateOutline, moonOutline, sunnyOutline, searchOutline, closeOutline, gitBranchOutline, trashOutline, navigateOutline, flagOutline, alertOutline, sendOutline, mapOutline, locationOutline });
     this.isDark = localStorage.getItem('theme') === 'dark';
   }
 
@@ -70,6 +76,9 @@ export class MapPage implements OnDestroy {
 
   ngOnDestroy() {
     if (this.map) this.map.remove();
+    if (this.watchId) {
+      navigator.geolocation.clearWatch(this.watchId);
+    }
   }
 
   private async initMap() {
@@ -88,7 +97,9 @@ export class MapPage implements OnDestroy {
         zoom: 13,
         zoomControl: false,
         attributionControl: true,
-        doubleClickZoom: false
+        doubleClickZoom: false,
+        touchZoom: true,
+        scrollWheelZoom: true
       });
     } catch (err) {
       console.error('Error creating Leaflet instance:', err);
@@ -125,6 +136,7 @@ export class MapPage implements OnDestroy {
 
     await this.cargarRutaAsignada();
     await this.cargarRecorridoActivo();
+    this.iniciarSeguimientoPosicion();
   }
 
   private async cargarRutaAsignada() {
@@ -434,5 +446,75 @@ export class MapPage implements OnDestroy {
       }
     }
     this.mostrarReporte = true;
+  }
+
+  private iniciarSeguimientoPosicion() {
+    if (!navigator.geolocation) return;
+
+    // Limpiar watch anterior si existe
+    if (this.watchId) {
+      navigator.geolocation.clearWatch(this.watchId);
+    }
+
+    this.watchId = navigator.geolocation.watchPosition(
+      async (pos) => {
+        const { latitude, longitude, accuracy, speed, heading } = pos.coords;
+        const currentPosition: L.LatLngExpression = [latitude, longitude];
+
+        // Calcular distancia desde la última posición enviada
+        let distancia = 0;
+        if (this.lastPosition) {
+          distancia = L.latLng(currentPosition).distanceTo(L.latLng(this.lastPosition));
+        }
+
+        // Enviar posición si es la primera o si la distancia es >= 10 metros
+        if (!this.lastPosition || distancia >= 10) {
+          this.lastPosition = currentPosition;
+
+          // Enviar posición si hay una asignación activa
+          if (this.asignacionActivaId && this.idAsignacionEnCurso) {
+            try {
+              const posicion = {
+                latitud: latitude,
+                longitud: longitude,
+                accuracy: accuracy,
+                speed: speed ?? undefined,
+                bearing: heading ?? undefined,
+                timestamp: new Date().toISOString()
+              };
+
+              // Usar enviarPosicionExterna si hay id_recorrido
+              const asignaciones = await this.asignacionesService.getAsignaciones();
+              const activa = asignaciones.find(a => a.id === this.asignacionActivaId);
+              
+              if (activa?.id_recorrido) {
+                await this.asignacionesService.enviarPosicionExterna(
+                  activa.id_recorrido,
+                  latitude,
+                  longitude
+                );
+              } else {
+                await this.asignacionesService.enviarPosicion(
+                  this.asignacionActivaId,
+                  posicion
+                );
+              }
+
+              console.log(`Posición enviada: ${latitude.toFixed(6)}, ${longitude.toFixed(6)} (distancia: ${distancia.toFixed(0)}m)`);
+            } catch (err) {
+              console.error('Error enviando posición:', err);
+            }
+          }
+        }
+      },
+      (err) => {
+        console.error('Error en seguimiento GPS:', err);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 5000
+      }
+    );
   }
 }

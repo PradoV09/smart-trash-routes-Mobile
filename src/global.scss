@@ -150,6 +150,10 @@ ion-content {
   font-size: 0.95rem;
   font-weight: 600;
   transition: all 0.2s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 
   &:disabled {
     opacity: 0.6;

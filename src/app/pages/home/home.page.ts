@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
-import { logOutOutline, moonOutline, sunnyOutline, clipboardOutline } from 'ionicons/icons';
+import { logOutOutline, moonOutline, sunnyOutline, clipboardOutline, checkmarkCircleOutline, timeOutline, listOutline } from 'ionicons/icons';
 import { AsignacionesService, Asignacion } from '../../services/asignaciones.service';
 import { AuthService } from '../../services/auth.service';
 import { GpsService } from '../../services/gps.service';
@@ -14,6 +14,7 @@ import { environment } from '../../../environments/environment';
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
+  styleUrls: ['./home.page.scss'],
   standalone: true,
   imports: [IonicModule, CommonModule, AsignacionCardComponent, SkeletonCardComponent]
 })
@@ -59,7 +60,7 @@ export class HomePage implements OnInit, OnDestroy {
     private webSocketService: WebSocketService,
     private gpsService: GpsService
   ) {
-    addIcons({ logOutOutline, moonOutline, sunnyOutline, clipboardOutline });
+    addIcons({ logOutOutline, moonOutline, sunnyOutline, clipboardOutline, checkmarkCircleOutline, timeOutline, listOutline });
     this.isDark = document.body.classList.contains('dark-theme');
   }
 
