@@ -19,7 +19,7 @@ export class GpsService {
     this.asignacionId = id;
     this.idRecorrido = idRecorrido || null;
     this.enviarPosicion();
-    this.intervalo = setInterval(() => this.enviarPosicion(), 30000);
+    this.intervalo = setInterval(() => this.enviarPosicion(), 10000);
   }
 
   detenerTracking() {
