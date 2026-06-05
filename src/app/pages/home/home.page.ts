@@ -2,11 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
-<<<<<<< HEAD
-import { logOutOutline, moonOutline, sunnyOutline, clipboardOutline, checkmarkCircleOutline, timeOutline, listOutline } from 'ionicons/icons';
-=======
-import { logOutOutline, moonOutline, sunnyOutline, clipboardOutline, cloudOfflineOutline, syncOutline } from 'ionicons/icons';
->>>>>>> 65df954cdd30e7e7f9e8287329afe0297e927e58
+import { logOutOutline, moonOutline, sunnyOutline, clipboardOutline, checkmarkCircleOutline, timeOutline, listOutline, cloudOfflineOutline, syncOutline } from 'ionicons/icons';
 import { AsignacionesService, Asignacion } from '../../services/asignaciones.service';
 import { AuthService } from '../../services/auth.service';
 import { GpsService } from '../../services/gps.service';
@@ -73,11 +69,7 @@ export class HomePage implements OnInit, OnDestroy {
     private networkService: NetworkService,
     private syncService: SyncService
   ) {
-<<<<<<< HEAD
-    addIcons({ logOutOutline, moonOutline, sunnyOutline, clipboardOutline, checkmarkCircleOutline, timeOutline, listOutline });
-=======
-    addIcons({ logOutOutline, moonOutline, sunnyOutline, clipboardOutline, cloudOfflineOutline, syncOutline });
->>>>>>> 65df954cdd30e7e7f9e8287329afe0297e927e58
+    addIcons({ logOutOutline, moonOutline, sunnyOutline, clipboardOutline, checkmarkCircleOutline, timeOutline, listOutline, cloudOfflineOutline, syncOutline });
     this.isDark = document.body.classList.contains('dark-theme');
   }
 
