@@ -259,7 +259,11 @@ export class ReporteModalComponent implements OnInit, OnDestroy {
       });
       const response = await this.reporteService.enviarReporte(reporteData);
       console.log('Respuesta del servidor:', response);
-      this.presentToast('Reporte enviado correctamente', 'success');
+      if (response?.offline) {
+        this.presentToast('Sin conexión: reporte guardado. Se enviará automáticamente.', 'warning');
+      } else {
+        this.presentToast('Reporte enviado correctamente', 'success');
+      }
       this.enviado.emit();
       this.cerrar.emit();
     } catch (err: any) {

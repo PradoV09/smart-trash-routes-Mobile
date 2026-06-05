@@ -28,6 +28,46 @@
       </div>
     </div>
 
+    <!-- BANNER OFFLINE -->
+    <div *ngIf="!isOnline" style="
+      background: #7C3A00;
+      border: 1px solid #F59E0B;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    ">
+      <ion-icon name="cloud-offline-outline" style="font-size: 20px; color: #F59E0B; flex-shrink: 0;"></ion-icon>
+      <div style="flex: 1;">
+        <p style="margin: 0; color: #FDE68A; font-size: 13px; font-weight: 600;">Sin conexión</p>
+        <p style="margin: 2px 0 0; color: #FCD34D; font-size: 11px;" *ngIf="pendientesTotal > 0">
+          {{ pendientesTotal }} dato{{ pendientesTotal !== 1 ? 's' : '' }} guardado{{ pendientesTotal !== 1 ? 's' : '' }} — se enviará{{ pendientesTotal !== 1 ? 'n' : '' }} al recuperar señal
+        </p>
+        <p style="margin: 2px 0 0; color: #FCD34D; font-size: 11px;" *ngIf="pendientesTotal === 0">
+          Mostrando datos en caché
+        </p>
+      </div>
+    </div>
+
+    <!-- BANNER SINCRONIZANDO -->
+    <div *ngIf="isOnline && pendientesTotal > 0" style="
+      background: #0A3A2A;
+      border: 1px solid #10B981;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    ">
+      <ion-icon name="sync-outline" style="font-size: 20px; color: #10B981; flex-shrink: 0;"></ion-icon>
+      <p style="margin: 0; color: #6EE7B7; font-size: 13px;">
+        Sincronizando {{ pendientesTotal }} dato{{ pendientesTotal !== 1 ? 's' : '' }} pendiente{{ pendientesTotal !== 1 ? 's' : '' }}...
+      </p>
+    </div>
+
     <!-- KPI CARDS -->
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px;">
       <div style="background: #1A2535; border-radius: 10px; padding: 10px 12px; text-align: center;">
