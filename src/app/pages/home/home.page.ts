@@ -2,14 +2,17 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
-import { logOutOutline, moonOutline, sunnyOutline, clipboardOutline } from 'ionicons/icons';
+import { logOutOutline, moonOutline, sunnyOutline, clipboardOutline, cloudOfflineOutline, syncOutline } from 'ionicons/icons';
 import { AsignacionesService, Asignacion } from '../../services/asignaciones.service';
 import { AuthService } from '../../services/auth.service';
 import { GpsService } from '../../services/gps.service';
 import { AsignacionCardComponent } from '../../components/asignacion-card/asignacion-card.component';
 import { SkeletonCardComponent } from '../../components/skeleton-card/skeleton-card.component';
 import { WebSocketService } from '../../services/websocket.service';
+import { NetworkService } from '../../services/network.service';
+import { SyncService } from '../../services/sync.service';
 import { environment } from '../../../environments/environment';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -22,8 +25,12 @@ export class HomePage implements OnInit, OnDestroy {
   loading = false;
   isInitialLoading = true;
   isDark = false;
+  isOnline = true;
+  pendientesTotal = 0;
   private serverErrorListener: any;
   private wsConnections: WebSocket[] = [];
+  private networkSub!: Subscription;
+  private pendientesInterval: any;
 
   // KPIs
   get completadas(): number {
@@ -57,13 +64,26 @@ export class HomePage implements OnInit, OnDestroy {
     private authService: AuthService,
     private toastController: ToastController,
     private webSocketService: WebSocketService,
-    private gpsService: GpsService
+    private gpsService: GpsService,
+    private networkService: NetworkService,
+    private syncService: SyncService
   ) {
-    addIcons({ logOutOutline, moonOutline, sunnyOutline, clipboardOutline });
+    addIcons({ logOutOutline, moonOutline, sunnyOutline, clipboardOutline, cloudOfflineOutline, syncOutline });
     this.isDark = document.body.classList.contains('dark-theme');
   }
 
   ngOnInit() {
+    this.isOnline = this.networkService.isOnline;
+    this.networkSub = this.networkService.online$.subscribe(async online => {
+      this.isOnline = online;
+      if (online) {
+        // Pequeña pausa para que el sync arranque antes de actualizar el contador
+        setTimeout(() => this.actualizarPendientes(), 3000);
+      }
+      await this.actualizarPendientes();
+    });
+    // Revisar pendientes cada 10s mientras está online sincronizando
+    this.pendientesInterval = setInterval(() => this.actualizarPendientes(), 10000);
     this.cargarAsignaciones();
     this.setupErrorListener();
   }
@@ -74,6 +94,13 @@ export class HomePage implements OnInit, OnDestroy {
     if (this.serverErrorListener) {
       window.removeEventListener('api:error', this.serverErrorListener);
     }
+    if (this.networkSub) this.networkSub.unsubscribe();
+    if (this.pendientesInterval) clearInterval(this.pendientesInterval);
+  }
+
+  async actualizarPendientes() {
+    const counts = await this.syncService.getPendientesCount();
+    this.pendientesTotal = counts.total;
   }
 
   setupErrorListener() {
