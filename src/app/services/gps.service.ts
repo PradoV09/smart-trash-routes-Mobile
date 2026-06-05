@@ -1,15 +1,19 @@
 import { Injectable } from '@angular/core';
 import { AsignacionesService } from './asignaciones.service';
+import { OfflineStorageService } from './offline-storage.service';
+import { NetworkService } from './network.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class GpsService {
   private intervalo: any;
   private asignacionId: string | number | null = null;
   private idRecorrido: string | null = null;
 
-  constructor(private asignacionesService: AsignacionesService) {}
+  constructor(
+    private asignacionesService: AsignacionesService,
+    private offlineStorage: OfflineStorageService,
+    private network: NetworkService
+  ) {}
 
   iniciarTracking(id: string | number, idRecorrido?: string) {
     this.asignacionId = id;
@@ -34,35 +38,47 @@ export class GpsService {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude, accuracy, speed, heading } = pos.coords;
+        const posicion = {
+          asignacionId: this.asignacionId!,
+          idRecorrido: this.idRecorrido,
+          latitud: latitude,
+          longitud: longitude,
+          accuracy: accuracy ?? undefined,
+          speed: speed ?? 0,
+          bearing: heading ?? 0,
+          timestamp: new Date().toISOString()
+        };
 
-        // Enviar a endpoint interno
-        try {
-          await this.asignacionesService.enviarPosicion(this.asignacionId!, {
-            latitud: latitude,
-            longitud: longitude,
-            accuracy: accuracy,
-            speed: speed || 0,
-            bearing: heading || 0,
-            timestamp: new Date().toISOString()
-          });
-        } catch (err) {
-          console.error('GPS interno error', err);
-        }
-
-        // Enviar a API externa si tenemos id_recorrido
-        if (this.idRecorrido) {
+        if (this.network.isOnline) {
+          // Con conexión: enviar directo
           try {
-            await this.asignacionesService.enviarPosicionExterna(
-              this.idRecorrido,
-              latitude,
-              longitude
-            );
+            await this.asignacionesService.enviarPosicion(this.asignacionId!, {
+              latitud: latitude,
+              longitud: longitude,
+              accuracy,
+              speed: speed || 0,
+              bearing: heading || 0,
+              timestamp: posicion.timestamp
+            });
           } catch (err) {
-            console.error('GPS externo error', err);
+            console.warn('[GPS] Error enviando online, guardando offline:', err);
+            await this.offlineStorage.guardarPosicion(posicion);
           }
+
+          if (this.idRecorrido) {
+            try {
+              await this.asignacionesService.enviarPosicionExterna(this.idRecorrido, latitude, longitude);
+            } catch (err) {
+              console.error('[GPS] Error GPS externo:', err);
+            }
+          }
+        } else {
+          // Sin conexión: guardar en IndexedDB
+          console.log('[GPS] Sin conexión. Guardando posición offline...');
+          await this.offlineStorage.guardarPosicion(posicion);
         }
       },
-      (err) => console.error('GPS error', err),
+      (err) => console.error('[GPS] Error obteniendo posición:', err),
       { enableHighAccuracy: true, timeout: 10000 }
     );
   }

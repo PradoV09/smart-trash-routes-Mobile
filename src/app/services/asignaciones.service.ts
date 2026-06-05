@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
+import { OfflineStorageService } from './offline-storage.service';
+import { NetworkService } from './network.service';
 import { environment } from '../../environments/environment';
 
 export interface Tripulante {
@@ -50,7 +52,11 @@ export interface FotoAsignacion {
   providedIn: 'root'
 })
 export class AsignacionesService {
-  constructor(private api: ApiService) {}
+  constructor(
+    private api: ApiService,
+    private offlineStorage: OfflineStorageService,
+    private network: NetworkService
+  ) {}
 
   // Parsea el shape MultiLineString (string JSON) a array de {lat, lon}
   private parseShape(shape: any): PuntoRuta[] {
@@ -78,32 +84,44 @@ export class AsignacionesService {
   }
 
   async getAsignaciones(): Promise<Asignacion[]> {
-    const res = await this.api.fetch('/api/driver/asignaciones', { method: 'GET' });
-    console.log('API Response:', JSON.stringify(res));
-    const lista = Array.isArray(res) ? res : (res?.data || []);
-    const mapped = lista.map((a: any) => ({
-      id: a.id_asignacion || a.id,
-      id_ruta: a.id_ruta,
-      id_recorrido: a.id_recorrido || a.recorrido_externo_id || null,
-      placa: a.vehiculo?.placa || 'N/A',
-      modelo: a.vehiculo?.modelo || 'N/A',
-      capacidad: a.vehiculo?.capacidad_m3 || 0,
-      estado: (a.estado || 'pendiente').toLowerCase(),
-      fecha: a.fecha,
-      hora_salida: a.hora_salida,
-      ruta_nombre: a.ruta?.nombre_ruta || null,
-      ruta_color: a.ruta?.color_hex || '#0A4174',
-      ruta_shape: this.parseShape(a.ruta?.shape),
-      tripulacion_nombre: a.tripulacion?.nombre || null,
-      tripulantes: (a.tripulacion?.miembros || []).map((m: any) => ({
-        id: m.id,
-        rol_tripulacion: m.rol_tripulacion || m.rol,
-        username: m.usuario?.username || m.username || 'Usuario',
-        correo: m.usuario?.correo || m.correo || '',
-      }))
-    }));
-    console.log('Mapped Asignaciones:', JSON.stringify(mapped));
-    return mapped;
+    if (this.network.isOnline) {
+      try {
+        const res = await this.api.fetch('/api/driver/asignaciones', { method: 'GET' });
+        console.log('API Response:', JSON.stringify(res));
+        const lista = Array.isArray(res) ? res : (res?.data || []);
+        const mapped = lista.map((a: any) => ({
+          id: a.id_asignacion || a.id,
+          id_ruta: a.id_ruta,
+          id_recorrido: a.id_recorrido || a.recorrido_externo_id || null,
+          placa: a.vehiculo?.placa || 'N/A',
+          modelo: a.vehiculo?.modelo || 'N/A',
+          capacidad: a.vehiculo?.capacidad_m3 || 0,
+          estado: (a.estado || 'pendiente').toLowerCase(),
+          fecha: a.fecha,
+          hora_salida: a.hora_salida,
+          ruta_nombre: a.ruta?.nombre_ruta || null,
+          ruta_color: a.ruta?.color_hex || '#0A4174',
+          ruta_shape: this.parseShape(a.ruta?.shape),
+          tripulacion_nombre: a.tripulacion?.nombre || null,
+          tripulantes: (a.tripulacion?.miembros || []).map((m: any) => ({
+            id: m.id,
+            rol_tripulacion: m.rol_tripulacion || m.rol,
+            username: m.usuario?.username || m.username || 'Usuario',
+            correo: m.usuario?.correo || m.correo || '',
+          }))
+        }));
+        // Guardar en caché para uso offline
+        await this.offlineStorage.guardarAsignacionesCache(mapped);
+        console.log('Mapped Asignaciones (online):', JSON.stringify(mapped));
+        return mapped;
+      } catch (error) {
+        console.warn('[Asignaciones] Error online, usando caché:', error);
+        return this.offlineStorage.getAsignacionesCache();
+      }
+    } else {
+      console.log('[Asignaciones] Sin conexión. Cargando desde caché...');
+      return this.offlineStorage.getAsignacionesCache();
+    }
   }
 
   async iniciarRecorrido(id: string | number): Promise<any> {
@@ -143,11 +161,23 @@ export class AsignacionesService {
   }
 
   async enviarFoto(id: string | number, foto: FotoAsignacion): Promise<any> {
-    return this.api.fetch(`/api/driver/asignaciones/${id}/fotos`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(foto)
-    });
+    if (this.network.isOnline) {
+      try {
+        return await this.api.fetch(`/api/driver/asignaciones/${id}/fotos`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(foto)
+        });
+      } catch (error) {
+        console.warn('[Foto] Error enviando online, guardando offline:', error);
+        await this.offlineStorage.guardarFoto(id, foto);
+        return { offline: true, message: 'Foto guardada localmente. Se enviará al recuperar conexión.' };
+      }
+    } else {
+      console.log('[Foto] Sin conexión. Guardando foto offline...');
+      await this.offlineStorage.guardarFoto(id, foto);
+      return { offline: true, message: 'Sin conexión. Foto guardada localmente.' };
+    }
   }
 
   async getTripulacion(id: string | number): Promise<any> {
